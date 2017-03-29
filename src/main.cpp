@@ -2,6 +2,7 @@
 #include <iostream>
 #include <irrlicht.h>
 #include "driverChoice.h"
+#include "COrientationAxisSceneNode.h"
 
 using namespace irr;
 
@@ -68,6 +69,7 @@ int main()
 
 	// add camera
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS(0, 100.0f, 1.2f);
+	//smgr->addCameraSceneNodeMaya(0, 100.0f, 1.2f);
 	camera->setPosition(core::vector3df(0,750,-879));
 	camera->setTarget(core::vector3df(13, 105, 80));
 	camera->setFarValue(42000.0f);
@@ -89,6 +91,11 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
 	scene::ISceneNode* skydome=smgr->addSkyDomeSceneNode(driver->getTexture("../irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
+
+	// axis
+	scene::COrientationAxisSceneNode* axisNode = new scene::COrientationAxisSceneNode(smgr->getRootSceneNode(), smgr);
+	axisNode->setScale(core::vector3df(300, 300, 300));
+	axisNode->setPosition(core::vector3df(0,50,0));
 
 	// create event receiver
 	MyEventReceiver receiver(device);
@@ -128,6 +135,7 @@ int main()
 		}
 	}
 
+	axisNode->drop();
 	floorMesh->drop();
 	device->drop();
 	
