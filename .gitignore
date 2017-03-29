@@ -1,4 +1,7 @@
-/irrlicht/
+/irrlicht/*
+!irrlicht/include/
+irrlicht/include/*
+!irrlicht/include/IrrCompileConfig.h
 /bin/
 
 /src/.vs/
