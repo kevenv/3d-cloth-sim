@@ -28,8 +28,8 @@ class MyEventReceiver : public IEventReceiver
 {
 public:
 
-	MyEventReceiver(scene::ISceneNode* terrain, scene::ISceneNode* skybox, scene::ISceneNode* skydome) :
-		Terrain(terrain), Skybox(skybox), Skydome(skydome), showBox(true), showDebug(false)
+	MyEventReceiver(IrrlichtDevice* device, scene::ISceneNode* terrain, scene::ISceneNode* skybox, scene::ISceneNode* skydome) :
+		device(device), Terrain(terrain), Skybox(skybox), Skydome(skydome), showBox(true), showDebug(false)
 	{
 		Skybox->setVisible(showBox);
 		Skydome->setVisible(!showBox);
@@ -66,6 +66,9 @@ public:
 				showDebug=!showDebug;
 				Terrain->setDebugDataVisible(showDebug?scene::EDS_BBOX_ALL:scene::EDS_OFF);
 				return true;
+			case irr::KEY_ESCAPE:
+				device->closeDevice();
+				return true;
 			default:
 				break;
 			}
@@ -75,6 +78,7 @@ public:
 	}
 
 private:
+	IrrlichtDevice* device;
 	scene::ISceneNode* Terrain;
 	scene::ISceneNode* Skybox;
 	scene::ISceneNode* Skydome;
@@ -90,10 +94,8 @@ parameter handling.
 */
 int main()
 {
-	// ask user for driver
-	video::E_DRIVER_TYPE driverType=driverChoiceConsole();
-	if (driverType==video::EDT_COUNT)
-		return 1;
+	// force OpenGL
+	video::E_DRIVER_TYPE driverType = video::E_DRIVER_TYPE::EDT_OPENGL;
 
 	// create device with full flexibility over creation parameters
 	// you can add more parameters if desired, check irr::SIrrlichtCreationParameters
@@ -119,8 +121,8 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
 	// add irrlicht logo
-	env->addImage(driver->getTexture("../irrlicht/media/irrlichtlogo2.png"),
-		core::position2d<s32>(10,10));
+	/*env->addImage(driver->getTexture("../irrlicht/media/irrlichtlogo2.png"),
+		core::position2d<s32>(10,10));*/
 
 	//set other font
 	env->getSkin()->setFont(env->getFont("../irrlicht/media/fontlucida.png"));
@@ -237,7 +239,7 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	// create event receiver
-	MyEventReceiver receiver(terrain, skybox, skydome);
+	MyEventReceiver receiver(device, terrain, skybox, skydome);
 	device->setEventReceiver(&receiver);
 
 	/*
