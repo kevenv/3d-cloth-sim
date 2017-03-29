@@ -1,29 +1,11 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+/irrlicht/
+/bin/
+
+/src/.vs/
+/src/x64/
+*.vcxproj.user
+*.log
+*.tlog
+*.lastbuildstate
+*.pdb
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
