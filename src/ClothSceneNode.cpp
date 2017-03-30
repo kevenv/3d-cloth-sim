@@ -1,20 +1,71 @@
 #include "ClothSceneNode.h"
+#include "Cloth.h"
+#include <vector>
 
-ClothSceneNode::ClothSceneNode(scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id):
-	scene::ISceneNode(parent, mgr, id)
+ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id):
+	scene::ISceneNode(parent, mgr, id),
+	m_Cloth(cloth)
 {
 	m_material.Wireframe = false;
 	m_material.Lighting = false;
+	m_material.BackfaceCulling = false;
 
-	m_vertices[0] = video::S3DVertex(0, 0, 10, 1, 1, 0, video::SColor(255, 0, 255, 255), 0, 1);
-	m_vertices[1] = video::S3DVertex(10, 0, -10, 1, 0, 0, video::SColor(255, 255, 0, 255), 1, 1);
-	m_vertices[2] = video::S3DVertex(0, 20, 0, 0, 1, 1, video::SColor(255, 255, 255, 0), 1, 0);
-	m_vertices[3] = video::S3DVertex(-10, 0, -10, 0, 0, 1, video::SColor(255, 0, 255, 0), 0, 0);
+	m_Mesh = new scene::SMesh();
 
-	m_box.reset(m_vertices[0].Pos);
-	for (s32 i = 1; i < 4; ++i) {
-		m_box.addInternalPoint(m_vertices[i].Pos);
+	//create
+	scene::SMeshBuffer* buf = new scene::SMeshBuffer();
+	m_Mesh->addMeshBuffer(buf);
+
+	int width = m_Cloth->getWidth();
+	int height = m_Cloth->getHeight();
+	std::vector<Particle>& particles = m_Cloth->getParticles();
+	m_nVertices = particles.size();
+
+	buf->Vertices.set_used(m_nVertices);
+	for (int i = 0; i < particles.size(); ++i) {
+		Particle& p = particles[i];
+
+		video::S3DVertex& v = buf->Vertices[i];
+		v.Pos.set(p.position.X, p.position.Y, p.position.Z);
+		v.Normal.set(0.0,0.0,0.0); //TODO:
+		v.Color = video::SColor(255, 0, 0, 255);
+		//v.TCoords.set();
 	}
+	
+	//2 triangles per quad, 3 pts per triangle
+	int nTriangles = 2*((width-1)*(height-1));
+	m_nIndices = 3*nTriangles;
+	buf->Indices.set_used(m_nIndices);
+	int i = 0;
+	for (int x = 0; x < width-1; ++x) {
+		for (int y = 0; y < height-1; ++y) {
+			buf->Indices[i+0] = idx2dTo1d(x,y);
+			buf->Indices[i+1] = idx2dTo1d(x+1,y);
+			buf->Indices[i+2] = idx2dTo1d(x,y+1);
+
+			buf->Indices[i+3] = idx2dTo1d(x,y+1);
+			buf->Indices[i+4] = idx2dTo1d(x+1,y);
+			buf->Indices[i+5] = idx2dTo1d(x+1,y+1);
+			i += 6;
+		}
+	}
+	
+	// set dirty flag to make sure that hardware copies of this
+	// buffer are also updated, see IMesh::setHardwareMappingHint
+	m_Mesh->setDirty();
+	m_Mesh->recalculateBoundingBox();
+}
+
+int ClothSceneNode::idx2dTo1d(int x, int y)
+{
+	return x + y*m_Cloth->getWidth();
+}
+
+ClothSceneNode::~ClothSceneNode()
+{
+	scene::IMeshBuffer* buf = m_Mesh->getMeshBuffer(0);
+	buf->drop();
+	m_Mesh->drop();
 }
 
 void ClothSceneNode::OnRegisterSceneNode()
@@ -28,10 +79,12 @@ void ClothSceneNode::OnRegisterSceneNode()
 
 void ClothSceneNode::render()
 {
-	u16 indices[] = { 0,2,3, 2,1,3, 1,0,3, 2,0,1 };
 	video::IVideoDriver* driver = SceneManager->getVideoDriver();
+
+	scene::IMeshBuffer* buf = m_Mesh->getMeshBuffer(0);
+	u16* indices = buf->getIndices();
 
 	driver->setMaterial(m_material);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-	driver->drawVertexPrimitiveList(&m_vertices[0], 4, &indices[0], 4, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
+	driver->drawVertexPrimitiveList(buf->getVertices(), m_nVertices, &indices[0], m_nIndices/3, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
 }

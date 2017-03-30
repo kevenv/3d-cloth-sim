@@ -101,9 +101,10 @@ int main()
 
 	// cloth
 	Cloth cloth;
-	cloth.generate(20, 10, 2.5);
-	ClothSceneNode* clothNode = new ClothSceneNode(smgr->getRootSceneNode(), smgr);
+	cloth.generate(20, 25, 2.5f);
+	ClothSceneNode* clothNode = new ClothSceneNode(&cloth, smgr->getRootSceneNode(), smgr);
 	clothNode->setScale(core::vector3df(10, 10, 10));
+	clothNode->setPosition(core::vector3df(-200,100,-100));
 
 	// light is just for nice effects
 	scene::ILightSceneNode *node = smgr->addLightSceneNode(0, core::vector3df(0, 100, 0),

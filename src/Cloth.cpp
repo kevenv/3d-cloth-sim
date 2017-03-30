@@ -1,9 +1,9 @@
 #include "Cloth.h"
 
 Cloth::Cloth():
-	m_Width(-1),
-	m_Height(-1),
-	m_Resolution(0.0f)
+	m_Width(0),
+	m_Height(0),
+	m_Resolution(1.0f)
 {
 
 }
@@ -12,24 +12,25 @@ void Cloth::clear()
 {
 	m_Particles.clear();
 	m_Springs.clear();
-	m_Width = -1;
-	m_Height = -1;
-	m_Resolution = 0.0f;
+	m_Width = 0;
+	m_Height = 0;
+	m_Resolution = 1.0f;
 }
 
 void Cloth::generate(int width, int height, float resolution)
 {
 	clear();
 
-	m_Width = width;
-	m_Height = height;
+	m_Width = width; //nParticles width
+	m_Height = height; //nParticles height
 	m_Resolution = resolution;
 
 	// create particles
-	for (int i = 0; i < width; ++i) {
-		f32 x = i*resolution;
-		for (int j = 0; j < height; ++j) {
-			f32 y = j*resolution;
+	for (int j = 0; j < height; ++j) {
+		f32 y = j*resolution;
+		for (int i = 0; i < width; ++i) {
+			f32 x = i*resolution;
+
 			Particle p;
 			p.position = core::vector3df(x,y,0);
 			m_Particles.push_back(p);

@@ -4,11 +4,13 @@
 #include <irrlicht.h>
 
 using namespace irr;
+class Cloth;
 
 class ClothSceneNode : public scene::ISceneNode
 {
 public:
-	ClothSceneNode(scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id = -1);
+	ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id = -1);
+	virtual ~ClothSceneNode();
 
 	virtual void OnRegisterSceneNode();
 	virtual void render();
@@ -21,6 +23,14 @@ private:
 	core::aabbox3d<f32> m_box;
 	video::S3DVertex m_vertices[4];
 	video::SMaterial m_material;
+
+	scene::SMesh* m_Mesh;
+	Cloth* m_Cloth;
+
+	int m_nVertices;
+	int m_nIndices;
+
+	int idx2dTo1d(int x, int y);
 };
 
 #endif
