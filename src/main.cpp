@@ -4,6 +4,7 @@
 #include "driverChoice.h"
 #include "COrientationAxisSceneNode.h"
 #include "ClothSceneNode.h"
+#include "Cloth.h"
 
 using namespace irr;
 
@@ -99,6 +100,8 @@ int main()
 	axisNode->setPosition(core::vector3df(0,50,0));
 
 	// cloth
+	Cloth cloth;
+	cloth.generate(20, 10, 2.5);
 	ClothSceneNode* clothNode = new ClothSceneNode(smgr->getRootSceneNode(), smgr);
 	clothNode->setScale(core::vector3df(10, 10, 10));
 

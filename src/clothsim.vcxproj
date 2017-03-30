@@ -216,6 +216,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="ClothSceneNode.cpp" />
     <ClCompile Include="COrientationAxisSceneNode.cpp" />
     <ClCompile Include="main.cpp">
@@ -234,10 +235,15 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="Spring.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cloth.h" />
     <ClInclude Include="ClothSceneNode.h" />
     <ClInclude Include="COrientationAxisSceneNode.h" />
+    <ClInclude Include="Particle.h" />
+    <ClInclude Include="Spring.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
