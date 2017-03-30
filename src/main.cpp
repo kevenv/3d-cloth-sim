@@ -3,6 +3,7 @@
 #include <irrlicht.h>
 #include "driverChoice.h"
 #include "COrientationAxisSceneNode.h"
+#include "ClothSceneNode.h"
 
 using namespace irr;
 
@@ -97,6 +98,24 @@ int main()
 	axisNode->setScale(core::vector3df(300, 300, 300));
 	axisNode->setPosition(core::vector3df(0,50,0));
 
+	// cloth
+	ClothSceneNode* clothNode = new ClothSceneNode(smgr->getRootSceneNode(), smgr);
+	clothNode->setScale(core::vector3df(10, 10, 10));
+
+	// light is just for nice effects
+	scene::ILightSceneNode *node = smgr->addLightSceneNode(0, core::vector3df(0, 100, 0),
+		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 500.0f);
+	if (node)
+	{
+		node->getLightData().Attenuation.set(0.f, 1.f / 500.f, 0.f);
+		scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(core::vector3df(0, 150, 0), 250.0f);
+		if (anim)
+		{
+			node->addAnimator(anim);
+			anim->drop();
+		}
+	}
+
 	// create event receiver
 	MyEventReceiver receiver(device);
 	device->setEventReceiver(&receiver);
@@ -135,6 +154,7 @@ int main()
 		}
 	}
 
+	clothNode->drop();
 	axisNode->drop();
 	floorMesh->drop();
 	device->drop();
