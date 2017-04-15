@@ -22,7 +22,7 @@
     <ProjectName>clothsim</ProjectName>
     <ProjectGuid>{3A5B74E5-6390-43B0-A459-2793B81FFD31}</ProjectGuid>
     <RootNamespace>ClothSim</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
