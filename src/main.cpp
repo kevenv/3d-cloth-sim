@@ -3,8 +3,8 @@
 #include <irrlicht.h>
 #include "driverChoice.h"
 #include "COrientationAxisSceneNode.h"
-#include "ClothSceneNode.h"
-#include "Cloth.h"
+#include "ClothRenderer.h"
+#include "ClothSimulator.h"
 
 using namespace irr;
 
@@ -98,14 +98,7 @@ int main()
 	scene::COrientationAxisSceneNode* axisNode = new scene::COrientationAxisSceneNode(smgr->getRootSceneNode(), smgr);
 	axisNode->setScale(core::vector3df(300, 300, 300));
 	axisNode->setPosition(core::vector3df(0,50,0));
-
-	// cloth
-	Cloth cloth;
-	cloth.generate(20, 25, 2.5f);
-	ClothSceneNode* clothNode = new ClothSceneNode(&cloth, smgr->getRootSceneNode(), smgr);
-	clothNode->setScale(core::vector3df(10, 10, 10));
-	clothNode->setPosition(core::vector3df(-200,100,-100));
-
+	
 	// light is just for nice effects
 	scene::ILightSceneNode *node = smgr->addLightSceneNode(0, core::vector3df(0, 100, 0),
 		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 500.0f);
@@ -120,6 +113,13 @@ int main()
 		}
 	}
 
+	// Cloth
+	ClothSimulator clothSimulator;
+	clothSimulator.init();
+	clothSimulator.addCloth();
+	ClothRenderer clothRenderer(smgr);
+	clothRenderer.init(clothSimulator.getCloths());
+
 	// create event receiver
 	MyEventReceiver receiver(device);
 	device->setEventReceiver(&receiver);
@@ -133,11 +133,12 @@ int main()
 	while(device->run())
 	if (device->isWindowActive())
 	{
-		driver->beginScene(true, true, 0 );
+		clothSimulator.update();
+		clothRenderer.update();
 
+		driver->beginScene(true, true, 0 );
 		smgr->drawAll();
 		env->drawAll();
-
 		driver->endScene();
 
 		/*const core::vector3df pos = camera->getPosition();
@@ -157,8 +158,9 @@ int main()
 			lastFPS = fps;
 		}
 	}
-
-	clothNode->drop();
+	
+	clothSimulator.close();
+	clothRenderer.close();
 	axisNode->drop();
 	floorMesh->drop();
 	device->drop();

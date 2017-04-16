@@ -68,6 +68,11 @@ ClothSceneNode::~ClothSceneNode()
 	m_Mesh->drop();
 }
 
+void ClothSceneNode::update()
+{
+
+}
+
 void ClothSceneNode::OnRegisterSceneNode()
 {
 	if (IsVisible) {

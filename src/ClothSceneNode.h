@@ -12,6 +12,8 @@ public:
 	ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id = -1);
 	virtual ~ClothSceneNode();
 
+	void update();
+
 	virtual void OnRegisterSceneNode();
 	virtual void render();
 
@@ -21,7 +23,6 @@ public:
 
 private:
 	core::aabbox3d<f32> m_box;
-	video::S3DVertex m_vertices[4];
 	video::SMaterial m_material;
 
 	scene::SMesh* m_Mesh;
