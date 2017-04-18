@@ -12,12 +12,17 @@ public:
 	Spring();
 	Spring(Particle* p1, Particle* p2);
 
+	void computeRestLength();
+	void setRestLength();
+	void apply();
+
 private:
 	Particle* p1;
 	Particle* p2;
 
-	f32 restLength;
-	f32 stiffness;
+	f32 l0; // rest length
+	f32 k; // stiffness
+	f32 b; // damping
 };
 
 #endif

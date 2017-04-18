@@ -26,7 +26,7 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 		Particle& p = particles[i];
 
 		video::S3DVertex& v = buf->Vertices[i];
-		v.Pos.set(p.position.X, p.position.Y, p.position.Z);
+		v.Pos.set(p.p.X, p.p.Y, p.p.Z);
 		v.Normal.set(0.0,0.0,0.0); //TODO:
 		v.Color = video::SColor(255, 0, 0, 255);
 		//v.TCoords.set();

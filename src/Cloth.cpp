@@ -32,7 +32,7 @@ void Cloth::generate(int width, int height, float resolution)
 			f32 x = i*resolution;
 
 			Particle p;
-			p.position = core::vector3df(x,y,0);
+			p.p = core::vector3df(x,y,0);
 			m_Particles.push_back(p);
 		}
 	}

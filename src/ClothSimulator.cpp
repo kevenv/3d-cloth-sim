@@ -26,7 +26,44 @@ void ClothSimulator::close()
 
 void ClothSimulator::update()
 {
+	float dt = 0.01f;
+	float kd = 1.0f;
+	float g = 9.81f;
+	
+	for (int i = 0; i < m_Particles.size(); ++i) {
+		Particle& p = *m_Particles[i];
+		// gravity force
+		p.addForce( p.mass * core::vector3df(0.0f, -g, 0.0f) );
+		// viscous drag
+		p.addForce( -kd * p.v );
+	}
 
+	// spring forces
+	for (int i = 0; i < m_Springs.size(); ++i) {
+		m_Springs[i]->apply();
+	}
+
+	// update velocities (symplectic euler)
+	for (int i = 0; i < m_Particles.size(); ++i) {
+		Particle& p = *m_Particles[i];
+		if (p.pinned) {
+			p.f.set(0.0f, 0.0f, 0.0f);
+			p.v.set(0.0f, 0.0f, 0.0f);
+		}
+		else {
+			p.v += (p.f / p.mass) * dt;
+		}
+	}
+
+	// collision responses
+
+	// update positions (symplectic euler)
+	for (int i = 0; i < m_Particles.size(); ++i) {
+		Particle& p = *m_Particles[i];
+		if (p.pinned) continue;
+		p.p += p.v * dt;
+		p.f.set(0.0f, 0.0f, 0.0f);
+	}
 }
 
 void ClothSimulator::addCloth()

@@ -7,10 +7,19 @@ using namespace irr;
 class Particle
 {
 public:
+	f32 mass;
+	bool pinned;
+	core::vector3df p;
+	core::vector3df v;
+	core::vector3df p0;
+	core::vector3df v0;
+	core::vector3df f;
+
 	Particle();
 
-	core::vector3df position;
-	f32 mass;
+	void reset();
+	void addForce(const core::vector3df& force);
+	double distance(float x, float y, float z);
 };
 
 #endif
