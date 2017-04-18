@@ -56,6 +56,7 @@ void ClothSimulator::update()
 	}
 
 	// collision responses
+	m_CollisionsHandler.handleCollisions(*this, dt);
 
 	// update positions (symplectic euler)
 	for (int i = 0; i < m_Particles.size(); ++i) {
