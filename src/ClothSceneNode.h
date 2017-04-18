@@ -31,7 +31,9 @@ private:
 	int m_nVertices;
 	int m_nIndices;
 
-	int idx2dTo1d(int x, int y);
+	void updateVertices(scene::SMeshBuffer* buffer);
+	inline int idx2dTo1d(int x, int y);
+	void setDirty();
 };
 
 #endif

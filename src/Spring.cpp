@@ -37,8 +37,6 @@ void Spring::apply()
 	core::vector3df ln = l.normalize();
 	core::vector3df l_ = p1->v - p2->v;
 	core::vector3df fa = -(k*(l.getLength() - l0) + b*l_.dotProduct(ln))*ln;
-	core::vector3df fb = -fa;
-
 	p1->addForce(fa);
-	p2->addForce(fb);
+	p2->addForce(-fa);
 }

@@ -33,5 +33,7 @@ void ClothRenderer::close()
 
 void ClothRenderer::update()
 {
-
+	for (int i = 0; i < m_ClothNodes.size(); ++i) {
+		m_ClothNodes[i]->update();
+	}
 }
