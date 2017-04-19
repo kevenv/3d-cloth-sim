@@ -143,10 +143,13 @@ int main()
 		cloth->setPosition(core::vector3df(-200, 100, 200));
 		cloth->setRotation(core::vector3df(-90, 0, 0));
 		cloth->generate(20, 25, 2.5f);
-		Particle* p0 = cloth->getParticle(19,24); p0->pinned = true;
+		/*Particle* p0 = cloth->getParticle(19,24); p0->pinned = true;
 		Particle* p1 = cloth->getParticle(0,24); p1->pinned = true;
 		Particle* p2 = cloth->getParticle(0,0); p2->pinned = true;
-		Particle* p3 = cloth->getParticle(19,0); p3->pinned = true;
+		Particle* p3 = cloth->getParticle(19,0); p3->pinned = true;*/
+		for (auto& p : cloth->getParticles()) {
+			p.pinned = true;
+		}
 		clothSimulator.addCloth(cloth);
 	}
 	ClothRenderer clothRenderer(smgr);
