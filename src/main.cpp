@@ -90,12 +90,14 @@ int main()
 	floorNode->setMaterialFlag(video::EMF_LIGHTING, false);
 
 	// cube
+	/*
 	scene::IMesh* cubeMesh = smgr->getGeometryCreator()->createCubeMesh(core::vector3df(1.0f, 1.0f, 1.0f));
 	scene::IMeshSceneNode* cubeNode = smgr->addMeshSceneNode(cubeMesh, 0, -1, core::vector3df(0, 0, 0));
 	cubeNode->setScale(core::vector3df(250, 250, 250));
 	cubeNode->setPosition(core::vector3df(0,0,0));
 	cubeNode->setMaterialType(video::EMT_SOLID);
 	cubeNode->setMaterialFlag(video::EMF_LIGHTING, false);
+	*/
 
 	// create skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
@@ -171,7 +173,7 @@ int main()
 	clothRenderer.close();
 	axisNode->drop();
 	floorMesh->drop();
-	cubeMesh->drop();
+	//cubeMesh->drop();
 	device->drop();
 	
 	return 0;
