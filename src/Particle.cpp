@@ -1,15 +1,13 @@
 #include "Particle.h"
 
-Particle::Particle() :
+Particle::Particle(float x, float y, float z, float vx, float vy, float vz):
 	mass(1.0f),
 	pinned(false),
-	p(0.0f, 0.0f, 0.0f),
-	v(0.0f, 0.0f, 0.0f),
-	p0(0.0f, 0.0f, 0.0f),
-	v0(0.0f, 0.0f, 0.0f),
-	f(0.0f, 0.0f, 0.0f)
+	f(0.0f,0.0f,0.0f)
 {
-
+	p0 = core::vector3df(x,y,z);
+	v0 = core::vector3df(vx,vy,vz);
+	reset();
 }
 
 void Particle::reset()

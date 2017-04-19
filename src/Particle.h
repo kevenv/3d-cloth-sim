@@ -14,8 +14,8 @@ public:
 	core::vector3df p0;
 	core::vector3df v0;
 	core::vector3df f;
-
-	Particle();
+	
+	Particle(float x, float y, float z, float vx, float vy, float vz);
 
 	void reset();
 	void addForce(const core::vector3df& force);
