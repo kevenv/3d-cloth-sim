@@ -171,6 +171,7 @@ int main()
 	clothRenderer.close();
 	axisNode->drop();
 	floorMesh->drop();
+	cubeMesh->drop();
 	device->drop();
 	
 	return 0;
