@@ -6,7 +6,7 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 	scene::ISceneNode(parent, mgr, id),
 	m_Cloth(cloth)
 {
-	m_material.Wireframe = false;
+	m_material.Wireframe = true;
 	m_material.Lighting = false;
 	m_material.BackfaceCulling = false;
 
