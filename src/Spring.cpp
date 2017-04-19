@@ -15,7 +15,7 @@ Spring::Spring():
 Spring::Spring(Particle* p1, Particle* p2):
 	p1(p1),
 	p2(p2),
-	k(1.0f),
+	k(100.0f),
 	b(1.0f)
 {
 	computeRestLength();
@@ -34,7 +34,7 @@ void Spring::setRestLength()
 void Spring::apply()
 {
 	core::vector3df l = p1->p - p2->p;
-	core::vector3df ln = l.normalize();
+	core::vector3df ln(l); ln.normalize();
 	core::vector3df l_ = p1->v - p2->v;
 	core::vector3df fa = -(k*(l.getLength() - l0) + b*l_.dotProduct(ln))*ln;
 	p1->addForce(fa);
