@@ -33,6 +33,13 @@ void Cloth::generate(int width, int height, float resolution)
 			m_Particles.push_back( Particle(x, y, 0, 0, 0, 0) );
 		}
 	}
+	
+	// transform to world
+	for (int i = 0; i < m_Particles.size(); ++i) {
+		Particle* p = &m_Particles[i];
+		p->p *= 10;
+		p->p += core::vector3df(-200, 100, -100);
+	}
 
 	for (int i = 0; i < m_Particles.size(); ++i) {
 		Particle* p = &m_Particles[i];

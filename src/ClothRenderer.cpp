@@ -18,8 +18,6 @@ void ClothRenderer::init(const std::vector<Cloth*>& cloths)
 	for (int i = 0; i < cloths.size(); ++i) {
 		Cloth* cloth = cloths[i];
 		ClothSceneNode* clothNode = new ClothSceneNode(cloth, m_smgr->getRootSceneNode(), m_smgr);
-		clothNode->setScale(core::vector3df(10, 10, 10));
-		clothNode->setPosition(core::vector3df(-200,100,-100));
 		m_ClothNodes.push_back(clothNode);
 	}
 }
