@@ -3,7 +3,9 @@
 Cloth::Cloth():
 	m_Width(0),
 	m_Height(0),
-	m_Resolution(1.0f)
+	m_Resolution(1.0f),
+	m_Position(0.0f,0.0f,0.0f),
+	m_Rotation(0.0f,0.0f,0.0f)
 {
 
 }
@@ -37,8 +39,11 @@ void Cloth::generate(int width, int height, float resolution)
 	// transform to world
 	for (int i = 0; i < m_Particles.size(); ++i) {
 		Particle* p = &m_Particles[i];
-		p->p *= 10;
-		p->p += core::vector3df(-200, 100, -100);
+		core::matrix4 m;
+		m.setRotationDegrees(m_Rotation);
+		m.rotateVect(p->p);
+		p->p *= 10.0f;
+		p->p += m_Position;
 	}
 
 	for (int i = 0; i < m_Particles.size(); ++i) {
@@ -74,9 +79,19 @@ void Cloth::generate(int width, int height, float resolution)
 
 void Cloth::addNeighbor(int x, int y, Particle* p1, float k, float b)
 {
+	Particle* p2 = getParticle(x,y);
+	if (p2) {
+		m_Springs.push_back(Spring(p1, p2, k, b));
+	}
+}
+
+Particle* Cloth::getParticle(int x, int y)
+{
 	if (x >= 0 && x < m_Width && y >= 0 && y < m_Height) {
 		int i = x + y*m_Width;
-		Particle* p2 = &m_Particles[i];
-		m_Springs.push_back(Spring(p1, p2, k, b));
+		return &m_Particles[i];
+	}
+	else {
+		return NULL;
 	}
 }

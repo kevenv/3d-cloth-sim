@@ -5,6 +5,7 @@
 #include "COrientationAxisSceneNode.h"
 #include "ClothRenderer.h"
 #include "ClothSimulator.h"
+#include "Cloth.h"
 
 using namespace irr;
 
@@ -126,7 +127,28 @@ int main()
 	// Cloth
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
-	clothSimulator.addCloth();
+	{
+		Cloth* cloth = new Cloth();
+		cloth->setPosition(core::vector3df(-200, 100, -100));
+		cloth->setRotation(core::vector3df(0, 0, 0));
+		cloth->generate(20, 25, 2.5f);
+		Particle* p0 = cloth->getParticle(19, 24); p0->pinned = true;
+		Particle* p1 = cloth->getParticle(0, 24); p1->pinned = true;
+		Particle* p2 = cloth->getParticle(0, 0); p2->pinned = true;
+		Particle* p3 = cloth->getParticle(19, 0); p3->pinned = true;
+		clothSimulator.addCloth(cloth);
+	}
+	{
+		Cloth* cloth = new Cloth();
+		cloth->setPosition(core::vector3df(-200, 100, 200));
+		cloth->setRotation(core::vector3df(-90, 0, 0));
+		cloth->generate(20, 25, 2.5f);
+		Particle* p0 = cloth->getParticle(19,24); p0->pinned = true;
+		Particle* p1 = cloth->getParticle(0,24); p1->pinned = true;
+		Particle* p2 = cloth->getParticle(0,0); p2->pinned = true;
+		Particle* p3 = cloth->getParticle(19,0); p3->pinned = true;
+		clothSimulator.addCloth(cloth);
+	}
 	ClothRenderer clothRenderer(smgr);
 	clothRenderer.init(clothSimulator.getCloths());
 

@@ -15,9 +15,12 @@ public:
 
 	inline std::vector<Spring>& getSprings() { return m_Springs; }
 	inline std::vector<Particle>& getParticles() { return m_Particles; }
+	Particle* getParticle(int x, int y);
 	inline int getWidth() { return m_Width; }
 	inline int getHeight() { return m_Height; }
 	inline float getResolution() { return m_Resolution; }
+	inline void setPosition(const core::vector3df& position) { m_Position = position; }
+	inline void setRotation(const core::vector3df& rotation) { m_Rotation = rotation; }
 
 private:
 	std::vector<Spring> m_Springs;
@@ -26,6 +29,9 @@ private:
 	int m_Width;
 	int m_Height;
 	float m_Resolution;
+
+	core::vector3df m_Position;
+	core::vector3df m_Rotation;
 
 	void addNeighbor(int x, int y, Particle* p1, float k, float b);
 };

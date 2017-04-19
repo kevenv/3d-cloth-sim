@@ -67,18 +67,11 @@ void ClothSimulator::update()
 	}
 }
 
-void ClothSimulator::addCloth()
+void ClothSimulator::addCloth(Cloth* cloth)
 {
-	Cloth* cloth = new Cloth();
-	cloth->generate(20, 25, 2.5f);
 	m_Cloths.push_back(cloth);
 
 	std::vector<Particle>& p = cloth->getParticles();
-	p[p.size()-1].pinned = true;
-	p[0 + 24*cloth->getWidth()].pinned = true;
-	p[0 + 0*cloth->getWidth()].pinned = true;
-	p[19 + 0*cloth->getWidth()].pinned = true;
-
 	for (int i = 0; i < p.size(); ++i) {
 		m_Particles.push_back(&p[i]);
 	}
