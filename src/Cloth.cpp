@@ -47,24 +47,24 @@ void Cloth::generate(int width, int height, float resolution)
 		int y = i / width;
 
 		// create structural springs
-		const float k_structural = 5.0f;
-		const float b_structural = 1.0f;
+		const float k_structural = 100.0f;
+		const float b_structural = 10.0f;
 		addNeighbor(x-1, y, p, k_structural, b_structural);
 		addNeighbor(x+1, y, p, k_structural, b_structural);
 		addNeighbor(x, y-1, p, k_structural, b_structural);
 		addNeighbor(x, y+1, p, k_structural, b_structural);
 
 		// create shear springs
-		const float k_shear = 125.0f;
+		const float k_shear = 25.0f;
 		const float b_shear = 1.0f;
 		addNeighbor(x-1, y-1, p, k_shear, b_shear);
 		addNeighbor(x+1, y-1, p, k_shear, b_shear);
 		addNeighbor(x-1, y+1, p, k_shear, b_shear);
 		addNeighbor(x+1, y+1, p, k_shear, b_shear);
-
+		
 		// create flexion springs
-		const float k_flexion = 15.0f;
-		const float b_flexion = 1.0f;
+		const float k_flexion = 80.0f;
+		const float b_flexion = 2.5f;
 		addNeighbor(x-2, y, p, k_flexion, b_flexion);
 		addNeighbor(x+2, y, p, k_flexion, b_flexion);
 		addNeighbor(x, y-2, p, k_flexion, b_flexion);

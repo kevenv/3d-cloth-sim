@@ -27,7 +27,7 @@ void ClothSimulator::close()
 void ClothSimulator::update()
 {
 	float dt = 0.01f;
-	float kd = 1.0f;
+	float kd = 0.01f;
 	float g = 9.81f;
 	
 	for (int i = 0; i < m_Particles.size(); ++i) {
@@ -74,6 +74,11 @@ void ClothSimulator::addCloth()
 	m_Cloths.push_back(cloth);
 
 	std::vector<Particle>& p = cloth->getParticles();
+	p[p.size()-1].pinned = true;
+	p[0 + 24*cloth->getWidth()].pinned = true;
+	p[0 + 0*cloth->getWidth()].pinned = true;
+	p[19 + 0*cloth->getWidth()].pinned = true;
+
 	for (int i = 0; i < p.size(); ++i) {
 		m_Particles.push_back(&p[i]);
 	}
