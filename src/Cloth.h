@@ -27,7 +27,7 @@ private:
 	int m_Height;
 	float m_Resolution;
 
-	void addNeighbor(int x, int y, Particle* p1);
+	void addNeighbor(int x, int y, Particle* p1, float k, float b);
 };
 
 #endif

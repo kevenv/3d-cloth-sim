@@ -12,11 +12,11 @@ Spring::Spring():
 
 }
 
-Spring::Spring(Particle* p1, Particle* p2):
+Spring::Spring(Particle* p1, Particle* p2, f32 k, f32 b):
 	p1(p1),
 	p2(p2),
-	k(100.0f),
-	b(1.0f)
+	k(k),
+	b(b)
 {
 	computeRestLength();
 }
