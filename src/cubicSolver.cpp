@@ -35,8 +35,8 @@ int cubic_solver(float a, float b, float c, float d, float* roots)
 	for (int i = 0; i < nIntervals; ++i) {
 		float x1 = intervals[i][0];
 		float x2 = intervals[i][1];
-		if (equals(x1, x2, 1E-6f)) continue; //skip 0,0 intervals
-		if (!cubic_sign_change(a, b, c, d, x1, x2)) continue; //skip interval with no sign change
+		if (equals(x1, x2, 1E-6f)) continue; //skip invalid intervals
+		if (!cubic_sign_change(a, b, c, d, x1, x2)) continue; //skip intervals with no sign change
 		roots[ri] = cubic_root_newton(a, b, c, d, x1, x2, 1E-6f);
 		std::cout << "cubic root(" << i << "):" << roots[ri] << std::endl;
 		ri++;
@@ -50,24 +50,21 @@ int cubic_bracket_roots(float a, float b, float c, float d, float intervals[3][2
 	const float min = -4.0f;
 	const float max = 4.0f;
 
+	// find critical points
+	//   critical points are x when f'(x) = 0
+	//   for Cubic f'(x) is a Quadratic
 	float r1, r2;
-	float qa = 3 * a;
-	float qb = 2 * b;
-	float qc = c;
-	int nRoots = quadratic_solver(qa, qb, qc, r1, r2);
+	int nRoots = quadratic_solver(3*a, 2*b, c, r1, r2);
 	std::cout << "(" << nRoots << ")" << r1 << "," << r2 << std::endl;
 
-	float r1_df = cubic_derived2(a, b, r1);
-	float r2_df = cubic_derived2(a, b, r2);
-	std::cout << r1_df << "," << r2_df << std::endl;
-
+	// Cubic always has an inflection point
 	float ifx = cubic_inflection(a, b);
 	std::cout << ifx << std::endl;
-		
-
+	
+	// find root intervals
 	int nIntervals = 0;
-
-	if (nRoots == 2) {
+	switch (nRoots) {
+	case 2:
 		if (r1 > r2) {
 			float tmp = r1;
 			r1 = r2;
@@ -102,39 +99,30 @@ int cubic_bracket_roots(float a, float b, float c, float d, float intervals[3][2
 		intervals[1][1] = r2;
 		intervals[2][0] = r2;
 		intervals[2][1] = max;
-
 		nIntervals = 3;
-	}
-	else if (nRoots == 1) {
+		break;
+	case 1:
 		if (!equals(r1, ifx, 1E-6f)) {
 			std::cout << "inflection points arent equals" << std::endl;
 		}
+		//break;
+	case 0:
+		//break;
+	default:
 		if (ifx < min) {
 			ifx = min;
 		}
 		if (ifx > max) {
-			r2 = min;
+			ifx = min;
 		}
 		intervals[0][0] = min;
 		intervals[0][1] = ifx;
 		intervals[1][0] = ifx;
 		intervals[1][1] = max;
 		nIntervals = 2;
+		break;
 	}
-	else {
-		if (ifx < min) {
-			ifx = min;
-		}
-		if (ifx > max) {
-			r2 = min;
-		}
-		intervals[0][0] = min;
-		intervals[0][1] = ifx;
-		intervals[1][0] = ifx;
-		intervals[1][1] = max;
-		nIntervals = 2;
-	}
-
+	
 	return nIntervals;
 }
 
@@ -259,14 +247,6 @@ float cubic(float a, float b, float c, float d, float x)
 float cubic_derived(float a, float b, float c, float x)
 {
 	return 3 * a*x*x + 2 * b*x + c;
-}
-
-/*
-	Second derivative of a Cubic is Linear
-*/
-float cubic_derived2(float a, float b, float x)
-{
-	return 6 * a*x + 2 * b;
 }
 
 /*

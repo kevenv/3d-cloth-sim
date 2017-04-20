@@ -16,7 +16,6 @@ bool equals(float a, float b, float epsillon);
 bool cubic_sign_change(float a, float b, float c, float d, float x1, float x2);
 float cubic(float a, float b, float c, float d, float x);
 float cubic_derived(float a, float b, float c, float x);
-float cubic_derived2(float a, float b, float x);
 float cubic_inflection(float a, float b);
 
 #endif
