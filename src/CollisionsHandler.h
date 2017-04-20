@@ -19,6 +19,7 @@ private:
 	void applyRepulsionsForces(ClothSimulator& clothSim, float dt);
 	void resolveCollisions(ClothSimulator& clothSim, float dt);
 
+	float solveCollisionTime(const core::vector3df x[4], const core::vector3df v[4], float dt);
 	bool tooClose(Cloth* clothA, Cloth* clothB);
 	bool testPointTriangle(Cloth* clothA, Cloth* clothB);
 	bool testEdgeEdge(Cloth* clothA, Cloth* clothB);
