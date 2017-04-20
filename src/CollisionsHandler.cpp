@@ -1,6 +1,7 @@
 #include "CollisionsHandler.h"
 
 #include "ClothSimulator.h"
+#include "cubicSolver.h"
 
 CollisionsHandler::CollisionsHandler()
 {
@@ -42,6 +43,15 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 
 		// collisions detection
 		resolved = true;
+
+		float roots[3] = { 0 };
+		//int nRoots = cubic_deriv(1, -6, 11, -6, roots);
+		//int nRoots = cubic_deriv(-0.335, 0.5, 3.82, -1.35, roots);
+		//int nRoots = cubic_deriv(0.33, 0.5, 3.82, -7.6, roots);
+		//int nRoots = cubic_deriv(0.33,-0.02,-3.8,1.85, roots);
+		//int nRoots = cubic_deriv(0.235, -0.02, -3.8, 5.2, roots);
+		//int nRoots = cubic_deriv(-0.655,0,0,0, roots);
+		int nRoots = cubic_solver(-0.315,-0.325,-3,0.15, roots);
 
 		iterations++;
 	}

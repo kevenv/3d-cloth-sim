@@ -222,6 +222,7 @@
     <ClCompile Include="ClothSimulator.cpp" />
     <ClCompile Include="CollisionsHandler.cpp" />
     <ClCompile Include="COrientationAxisSceneNode.cpp" />
+    <ClCompile Include="cubicSolver.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -248,6 +249,7 @@
     <ClInclude Include="ClothSimulator.h" />
     <ClInclude Include="CollisionsHandler.h" />
     <ClInclude Include="COrientationAxisSceneNode.h" />
+    <ClInclude Include="cubicSolver.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Spring.h" />
   </ItemGroup>
