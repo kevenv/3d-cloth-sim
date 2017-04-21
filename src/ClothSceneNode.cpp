@@ -6,8 +6,8 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 	scene::ISceneNode(parent, mgr, id),
 	m_Cloth(cloth)
 {
-	m_material.Wireframe = true;
-	m_material.Lighting = false;
+	m_material.Wireframe = false;
+	m_material.Lighting = true;
 	m_material.BackfaceCulling = false;
 
 	m_Mesh = new scene::SMesh();
@@ -49,6 +49,8 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 			i += 6;
 		}
 	}
+
+	updateNormals(buf);
 	
 	setDirty();
 }
@@ -68,9 +70,36 @@ void ClothSceneNode::updateVertices(scene::SMeshBuffer* buffer)
 
 		video::S3DVertex& v = buffer->Vertices[i];
 		v.Pos.set(p.p.X, p.p.Y, p.p.Z);
-		v.Normal.set(0.0, 0.0, 0.0); //TODO:
 		v.Color = video::SColor(255, 0, 0, 255);
 		//v.TCoords.set();
+	}
+}
+
+void ClothSceneNode::updateNormals(scene::SMeshBuffer* buffer)
+{
+	const u32 vtxcnt = buffer->getVertexCount();
+	for (int i = 0; i != vtxcnt; ++i) {
+		buffer->getNormal(i).set(0.f, 0.f, 0.f);
+	}
+
+	auto& indices = m_Cloth->getTriangleIndices();
+	for (int i = 0; i < indices.size(); i += 3) {
+		video::S3DVertex& a = buffer->Vertices[indices[i + 0]];
+		video::S3DVertex& b = buffer->Vertices[indices[i + 1]];
+		video::S3DVertex& c = buffer->Vertices[indices[i + 2]];
+		
+		//calc normal
+		core::vector3df U(b.Pos - a.Pos);
+		core::vector3df V(c.Pos - a.Pos);
+		core::vector3df n(U.crossProduct(V));
+
+		a.Normal += n;
+		b.Normal += n;
+		c.Normal += n;
+	}
+	
+	for (int i = 0; i < vtxcnt; ++i) {
+		buffer->getNormal(i).normalize();
 	}
 }
 
@@ -78,6 +107,7 @@ void ClothSceneNode::update()
 {
 	scene::SMeshBuffer* buf = static_cast<scene::SMeshBuffer*>(m_Mesh->getMeshBuffer(0));
 	updateVertices(buf);
+	updateNormals(buf);
 	setDirty();
 }
 

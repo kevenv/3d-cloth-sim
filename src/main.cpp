@@ -119,7 +119,7 @@ int main()
 		scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(core::vector3df(0, 150, 0), 250.0f);
 		if (anim)
 		{
-			node->addAnimator(anim);
+			//node->addAnimator(anim);
 			anim->drop();
 		}
 	}
