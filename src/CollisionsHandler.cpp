@@ -204,7 +204,7 @@ bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& 
 	float denom = dot00 * dot11 - dot01 * dot01;
 	float u = (dot11 * dot20 - dot01 * dot21) * denom;
 	float v = (dot00 * dot21 - dot01 * dot20) * denom;
-	float w = 1.0f - v - w;
+	float w = 1.0f - u - v;
 
 	// Check if point is in triangle
 	float eps = 1E-6f;
