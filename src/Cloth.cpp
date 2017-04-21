@@ -1,5 +1,7 @@
 #include "Cloth.h"
 
+#include <cassert>
+
 Cloth::Cloth():
 	m_Width(0),
 	m_Height(0),
@@ -28,6 +30,9 @@ void Cloth::generate(int width, int height, float resolution)
 	m_Height = height; //nParticles height
 	m_Resolution = resolution;
 
+	assert( m_Resolution >= 0.0 ); // this would be stupid
+	assert( m_Width >= 2 && m_Height >= 2); // not a cloth mesh
+
 	// create particles
 	for (int j = 0; j < height; ++j) {
 		f32 y = j*resolution;
@@ -49,31 +54,25 @@ void Cloth::generate(int width, int height, float resolution)
 
 	for (int i = 0; i < m_Particles.size(); ++i) {
 		Particle* p = &m_Particles[i];
-		int x = i % width;
-		int y = i / width;
+		int x, y;
+		idx1Dto2D(i, x, y);
 
 		// create structural springs
 		const float k_structural = 100.0f;
 		const float b_structural = 10.0f;
-		addNeighbor(x-1, y, p, k_structural, b_structural);
 		addNeighbor(x+1, y, p, k_structural, b_structural);
-		addNeighbor(x, y-1, p, k_structural, b_structural);
 		addNeighbor(x, y+1, p, k_structural, b_structural);
 
 		// create shear springs
 		const float k_shear = 25.0f;
 		const float b_shear = 1.0f;
-		addNeighbor(x-1, y-1, p, k_shear, b_shear);
-		addNeighbor(x+1, y-1, p, k_shear, b_shear);
 		addNeighbor(x-1, y+1, p, k_shear, b_shear);
 		addNeighbor(x+1, y+1, p, k_shear, b_shear);
 		
 		// create flexion springs
 		const float k_flexion = 80.0f;
 		const float b_flexion = 2.5f;
-		addNeighbor(x-2, y, p, k_flexion, b_flexion);
 		addNeighbor(x+2, y, p, k_flexion, b_flexion);
-		addNeighbor(x, y-2, p, k_flexion, b_flexion);
 		addNeighbor(x, y+2, p, k_flexion, b_flexion);
 	}
 }
@@ -89,7 +88,7 @@ void Cloth::addNeighbor(int x, int y, Particle* p1, float k, float b)
 Particle* Cloth::getParticle(int x, int y)
 {
 	if (x >= 0 && x < m_Width && y >= 0 && y < m_Height) {
-		int i = x + y*m_Width;
+		int i = idx2Dto1D(x,y);
 		return &m_Particles[i];
 	}
 	else {

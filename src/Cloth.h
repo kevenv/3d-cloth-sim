@@ -16,13 +16,13 @@ public:
 	inline std::vector<Spring>& getSprings() { return m_Springs; }
 	inline std::vector<Particle>& getParticles() { return m_Particles; }
 	Particle* getParticle(int x, int y);
-	inline int getWidth() { return m_Width; }
-	inline int getHeight() { return m_Height; }
-	inline float getResolution() { return m_Resolution; }
+	inline int getWidth() const { return m_Width; }
+	inline int getHeight() const { return m_Height; }
+	inline float getResolution() const { return m_Resolution; }
 	inline void setPosition(const core::vector3df& position) { m_Position = position; }
 	inline void setRotation(const core::vector3df& rotation) { m_Rotation = rotation; }
-	void addTriangleIndex(int idx);
 	inline std::vector<int>& getTriangleIndices() { return m_TriangleIndices; }
+	void addTriangleIndex(int idx);
 
 private:
 	std::vector<Spring> m_Springs;
@@ -38,6 +38,15 @@ private:
 	core::vector3df m_Rotation;
 
 	void addNeighbor(int x, int y, Particle* p1, float k, float b);
+	inline void idx1Dto2D(int idx, int& x, int& y)
+	{
+		x = idx % m_Width;
+		y = idx / m_Width;
+	}
+	inline int idx2Dto1D(int x, int y)
+	{
+		return x + y * m_Width;
+	}
 };
 
 #endif
