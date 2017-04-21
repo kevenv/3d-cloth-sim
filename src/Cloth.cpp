@@ -96,6 +96,31 @@ Particle* Cloth::getParticle(int x, int y)
 	}
 }
 
+void Cloth::pinUpCorners(bool pinned)
+{
+	Particle* p0 = getParticle(m_Width-1, m_Height-1); p0->pinned = pinned;
+	Particle* p1 = getParticle(0, m_Height-1); p1->pinned = pinned;
+}
+
+void Cloth::pinDownCorners(bool pinned)
+{
+	Particle* p2 = getParticle(0, 0); p2->pinned = pinned;
+	Particle* p3 = getParticle(m_Width-1, 0); p3->pinned = pinned;
+}
+
+void Cloth::pinAllCorners(bool pinned)
+{
+	pinUpCorners(pinned);
+	pinDownCorners(pinned);
+}
+
+void Cloth::pinAll(bool pinned)
+{
+	for (auto& p : m_Particles) {
+		p.pinned = pinned;
+	}
+}
+
 void Cloth::addTriangleIndex(int idx)
 {
 	m_TriangleIndices.push_back(idx);

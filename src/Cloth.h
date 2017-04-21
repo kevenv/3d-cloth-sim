@@ -21,6 +21,10 @@ public:
 	inline float getResolution() const { return m_Resolution; }
 	inline void setPosition(const core::vector3df& position) { m_Position = position; }
 	inline void setRotation(const core::vector3df& rotation) { m_Rotation = rotation; }
+	void pinUpCorners(bool pinned = true);
+	void pinDownCorners(bool pinned = true);
+	void pinAllCorners(bool pinned = true);
+	void pinAll(bool pinned = true);
 	inline std::vector<int>& getTriangleIndices() { return m_TriangleIndices; }
 	void addTriangleIndex(int idx);
 
