@@ -132,7 +132,7 @@ int main()
 		cloth->setPosition(core::vector3df(-200, 100, -100));
 		cloth->setRotation(core::vector3df(0, 0, 0));
 		cloth->generate(20, 25, 2.5f);
-		cloth->pinAllCorners();
+		cloth->pinUpCorners();
 		clothSimulator.addCloth(cloth);
 	}
 	{
