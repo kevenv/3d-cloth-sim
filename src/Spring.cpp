@@ -5,9 +5,9 @@
 Spring::Spring():
 	p1(NULL),
 	p2(NULL),
-	k(1.0f),
-	b(1.0f),
-	l0(1.0f)
+	k(0.0f),
+	b(0.0f),
+	l0(0.0f)
 {
 
 }
@@ -23,12 +23,7 @@ Spring::Spring(Particle* p1, Particle* p2, f32 k, f32 b):
 
 void Spring::computeRestLength()
 {
-	l0 = p1->p0.getDistanceFrom(p2->p0);
-}
-
-void Spring::setRestLength()
-{
-	l0 = p1->p.getDistanceFrom(p2->p);
+	l0 = p1->getP0().getDistanceFrom(p2->getP0());
 }
 
 void Spring::apply()

@@ -45,11 +45,11 @@ void Cloth::generate(int width, int height, float resolution)
 	// transform to world
 	for (int i = 0; i < m_Particles.size(); ++i) {
 		Particle* p = &m_Particles[i];
+		core::vector3df newP0(p->getP0());
 		core::matrix4 m;
 		m.setRotationDegrees(m_Rotation);
-		m.rotateVect(p->p);
-		p->p *= 10.0f;
-		p->p += m_Position;
+		m.rotateVect(newP0);
+		p->setP0(newP0 * 10.0f + m_Position);
 	}
 
 	for (int i = 0; i < m_Particles.size(); ++i) {
