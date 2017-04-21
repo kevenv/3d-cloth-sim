@@ -2,6 +2,9 @@
 
 #include "ClothSimulator.h"
 #include "cubicSolver.h"
+#include "Spring.h"
+#include "Particle.h"
+#include "Cloth.h"
 #include <math.h>
 
 CollisionsHandler::CollisionsHandler()
@@ -22,14 +25,39 @@ void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
-	auto& cloths = clothSim.getCloths();
-	for (int i = 0; i < cloths.size(); ++i) {
-		Cloth* clothA = cloths[i];
-		for (int i = 0; i < cloths.size(); ++i) {
-			Cloth* clothB = cloths[i];
-			// cloth too close to ITSELF or SOMETHING ELSE
-			if (tooClose(clothA, clothB)) { 
-				//apply repulsion force
+	//todo: create a static array of all particles in all springs of all cloths
+	auto& springs = clothSim.getSprings();
+	for (auto* sA : springs) {
+		core::vector3df& x0 = sA->getP1()->p;
+		core::vector3df& x1 = sA->getP2()->p;
+		for (auto* sB : springs) {
+			if (sA != sB) {
+				core::vector3df& x2 = sB->getP1()->p;
+				core::vector3df& x3 = sB->getP2()->p;
+				if (testEdgeEdge(x0, x1, x2, x3)) {
+					//apply repulsion force
+					sA->getP1()->p += 3.0f;
+				}
+			}
+		}
+	}
+
+	auto& particles = clothSim.getParticles();
+	for (auto* p : particles) {
+		auto& cloths = clothSim.getCloths();
+		for (auto* c : cloths) { //todo: create a list of all triangles for all cloths
+			auto& indices = c->getTriangleIndices();
+			for (int i = 0; i < indices.size(); i+=3) {
+				auto& pCloth = c->getParticles();
+				core::vector3df* x1 = &pCloth[indices[i + 0]].p;
+				core::vector3df* x2 = &pCloth[indices[i + 1]].p;
+				core::vector3df* x3 = &pCloth[indices[i + 2]].p;
+				if (!partOfTriangle(&p->p, x1, x2, x3)) {
+					if (testPointTriangle(p->p, *x1, *x2, *x3)) {
+						//apply repulsion force
+						p->p += 3.0f;
+					}
+				}
 			}
 		}
 	}
@@ -101,19 +129,9 @@ float CollisionsHandler::solveCollisionTime(const core::vector3df x[4], const co
 	return root;
 }
 
-bool CollisionsHandler::tooClose(Cloth* clothA, Cloth* clothB)
+bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* x1, core::vector3df* x2, core::vector3df* x3)
 {
-	return testPointTriangle(clothA, clothB) || testEdgeEdge(clothA, clothB);
-}
-
-bool CollisionsHandler::testPointTriangle(Cloth* clothA, Cloth* clothB)
-{
-	return false;
-}
-
-bool CollisionsHandler::testEdgeEdge(Cloth* clothA, Cloth* clothB)
-{
-	return false;
+	return p == x1 || p == x2 || p == x3;
 }
 
 /*
@@ -122,6 +140,7 @@ bool CollisionsHandler::testEdgeEdge(Cloth* clothA, Cloth* clothB)
 */
 bool CollisionsHandler::testPointTriangle(core::vector3df & x0, core::vector3df& x1, core::vector3df& x2, core::vector3df& x3)
 {
+
 	return false;
 }
 

@@ -21,6 +21,8 @@ public:
 	inline float getResolution() { return m_Resolution; }
 	inline void setPosition(const core::vector3df& position) { m_Position = position; }
 	inline void setRotation(const core::vector3df& rotation) { m_Rotation = rotation; }
+	void addTriangleIndex(int idx);
+	inline std::vector<int>& getTriangleIndices() { return m_TriangleIndices; }
 
 private:
 	std::vector<Spring> m_Springs;
@@ -29,6 +31,8 @@ private:
 	int m_Width;
 	int m_Height;
 	float m_Resolution;
+
+	std::vector<int> m_TriangleIndices;
 
 	core::vector3df m_Position;
 	core::vector3df m_Rotation;

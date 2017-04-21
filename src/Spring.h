@@ -15,6 +15,8 @@ public:
 	void computeRestLength();
 	void setRestLength();
 	void apply();
+	inline Particle* getP1() { return p1; }
+	inline Particle* getP2() { return p2; }
 
 private:
 	Particle* p1;

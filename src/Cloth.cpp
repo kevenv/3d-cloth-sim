@@ -14,6 +14,7 @@ void Cloth::clear()
 {
 	m_Particles.clear();
 	m_Springs.clear();
+	m_TriangleIndices.clear();
 	m_Width = 0;
 	m_Height = 0;
 	m_Resolution = 1.0f;
@@ -94,4 +95,9 @@ Particle* Cloth::getParticle(int x, int y)
 	else {
 		return NULL;
 	}
+}
+
+void Cloth::addTriangleIndex(int idx)
+{
+	m_TriangleIndices.push_back(idx);
 }

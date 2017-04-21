@@ -37,6 +37,15 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 			buf->Indices[i+3] = idx2dTo1d(x,y+1);
 			buf->Indices[i+4] = idx2dTo1d(x+1,y);
 			buf->Indices[i+5] = idx2dTo1d(x+1,y+1);
+
+			// copy for triangle iterator
+			m_Cloth->addTriangleIndex(buf->Indices[i+0]);
+			m_Cloth->addTriangleIndex(buf->Indices[i+1]);
+			m_Cloth->addTriangleIndex(buf->Indices[i+2]);
+			m_Cloth->addTriangleIndex(buf->Indices[i+3]);
+			m_Cloth->addTriangleIndex(buf->Indices[i+4]);
+			m_Cloth->addTriangleIndex(buf->Indices[i+5]);
+
 			i += 6;
 		}
 	}
