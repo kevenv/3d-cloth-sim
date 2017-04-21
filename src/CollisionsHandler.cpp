@@ -70,12 +70,55 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 	while (!resolved && iterations < 1000) {
 		resolved = true;
 
+		//todo: create a static array of all particles in all springs of all cloths
+		auto& springs = clothSim.getSprings();
+		for (auto* sA : springs) {
+			core::vector3df& x0 = sA->getP1()->p;
+			core::vector3df& x1 = sA->getP2()->p;
+			for (auto* sB : springs) {
+				if (sA != sB) {
+					core::vector3df& x2 = sB->getP1()->p;
+					core::vector3df& x3 = sB->getP2()->p;
+
+					core::vector3df x[4];
+					core::vector3df v[4];
+					float t = solveCollisionTime(x, v, dt);
+
+					if (testEdgeEdge(x0, x1, x2, x3)) {
+						//apply repulsion force
+						sA->getP1()->p += 3.0f;
+					}
+				}
+			}
+		}
+
+		auto& particles = clothSim.getParticles();
+		for (auto* p : particles) {
+			auto& cloths = clothSim.getCloths();
+			for (auto* c : cloths) { //todo: create a list of all triangles for all cloths
+				auto& indices = c->getTriangleIndices();
+				for (int i = 0; i < indices.size(); i += 3) {
+					auto& pCloth = c->getParticles();
+					core::vector3df* x1 = &pCloth[indices[i + 0]].p;
+					core::vector3df* x2 = &pCloth[indices[i + 1]].p;
+					core::vector3df* x3 = &pCloth[indices[i + 2]].p;
+
+					core::vector3df x[4];
+					core::vector3df v[4];
+					float t = solveCollisionTime(x, v, dt);
+
+					if (!partOfTriangle(&p->p, x1, x2, x3)) {
+						if (testPointTriangle(p->p, *x1, *x2, *x3)) {
+							//apply repulsion force
+							p->p += 3.0f;
+						}
+					}
+				}
+			}
+		}
+
 		// collisions detection
 		resolved = true;
-
-		core::vector3df x[4];
-		core::vector3df v[4];
-		float t = solveCollisionTime(x,v,dt);
 
 		iterations++;
 	}
