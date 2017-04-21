@@ -36,6 +36,8 @@ void ClothSimulator::update()
 		p.addForce( p.mass * core::vector3df(0.0f, -g, 0.0f) );
 		// viscous drag
 		p.addForce( -kd * p.v );
+
+		p.addForce(core::vector3df(-2.0f,0.0f,-2.0f));
 	}
 
 	// spring forces
