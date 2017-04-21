@@ -140,6 +140,13 @@ bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* a, c
 */
 bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
 {
+	core::vector3df x43(p - c);
+	core::vector3df U(b - a);
+	core::vector3df V(c - a);
+	core::vector3df n(U.crossProduct(V));
+	n.normalize();
+	if ( abs(x43.dotProduct(n)) >= 1E-3f ) return false;
+
 	// Compute barycentric coordinates
 	core::vector3df v0(b - a);
 	core::vector3df v1(c - a);
@@ -155,7 +162,8 @@ bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& 
 	float w = 1.0f - v - w;
 
 	// Check if point is in triangle
-	return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
+	float eps = 1E-6f;
+	return (u >= 0.0f - eps) && (v >= 0.0f - eps) && (u + v <= 1.0f + eps);
 }
 
 /*
