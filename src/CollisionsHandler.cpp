@@ -129,19 +129,33 @@ float CollisionsHandler::solveCollisionTime(const core::vector3df x[4], const co
 	return root;
 }
 
-bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* x1, core::vector3df* x2, core::vector3df* x3)
+bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* a, core::vector3df* b, core::vector3df* c)
 {
-	return p == x1 || p == x2 || p == x3;
+	return p == a || p == b || p == c;
 }
 
 /*
-	x0 = Point
-	x1,x2,x3 = Triangle
+	p = Point
+	a,b,c = Triangle
 */
-bool CollisionsHandler::testPointTriangle(core::vector3df & x0, core::vector3df& x1, core::vector3df& x2, core::vector3df& x3)
+bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
 {
+	// Compute barycentric coordinates
+	core::vector3df v0(b - a);
+	core::vector3df v1(c - a);
+	core::vector3df v2(p - a);
+	float dot00 = v0.dotProduct(v0);
+	float dot01 = v0.dotProduct(v1);
+	float dot11 = v1.dotProduct(v1);
+	float dot20 = v2.dotProduct(v0);
+	float dot21 = v2.dotProduct(v1);
+	float denom = dot00 * dot11 - dot01 * dot01;
+	float u = (dot11 * dot20 - dot01 * dot21) * denom;
+	float v = (dot00 * dot21 - dot01 * dot20) * denom;
+	float w = 1.0f - v - w;
 
-	return false;
+	// Check if point is in triangle
+	return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
 }
 
 /*
