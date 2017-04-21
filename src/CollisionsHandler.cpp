@@ -36,7 +36,7 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 				core::vector3df& x3 = sB->getP2()->p;
 				if (testEdgeEdge(x0, x1, x2, x3)) {
 					//apply repulsion force
-					sA->getP1()->p += 3.0f;
+					sA->getP1()->p += 0.0f;
 				}
 			}
 		}
@@ -55,7 +55,7 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 				if (!partOfTriangle(&p->p, x1, x2, x3)) {
 					if (testPointTriangle(p->p, *x1, *x2, *x3)) {
 						//apply repulsion force
-						p->p += 3.0f;
+						p->p += 0.0f;
 					}
 				}
 			}
@@ -180,6 +180,8 @@ bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* a, c
 /*
 	p = Point
 	a,b,c = Triangle
+
+	From: Real Time Collision Detection, Christer Ericson, p.47
 */
 bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
 {
@@ -210,10 +212,36 @@ bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& 
 }
 
 /*
-	x0,x1 = Edge 1
-	x2,x3 = Edge 2
+	p1,p2 = Edge 1
+	p3,p4 = Edge 2
+
+	From: Paul Bourke (http://paulbourke.net/geometry/pointlineplane/)
 */
-bool CollisionsHandler::testEdgeEdge(core::vector3df & x0, core::vector3df & x1, core::vector3df & x2, core::vector3df & x3)
+bool CollisionsHandler::testEdgeEdge(core::vector3df & p1, core::vector3df & p2, core::vector3df & p3, core::vector3df & p4)
 {
-	return false;
+	const float EPS = 1E-6f;
+	core::vector3df p13, p43, p21;
+	
+	p13.X = p1.X - p3.X;
+	p13.Y = p1.Y - p3.Y;
+	p13.Z = p1.Z - p3.Z;
+	p43.X = p4.X - p3.X;
+	p43.Y = p4.Y - p3.Y;
+	p43.Z = p4.Z - p3.Z;
+	if (abs(p43.X) < EPS && abs(p43.Y) < EPS && abs(p43.Z) < EPS) return false;
+	p21.X = p2.X - p1.X;
+	p21.Y = p2.Y - p1.Y;
+	p21.Z = p2.Z - p1.Z;
+	if (abs(p21.X) < EPS && abs(p21.Y) < EPS && abs(p21.Z) < EPS) return false;
+
+	float d1343 = p13.X * p43.X + p13.Y * p43.Y + p13.Z * p43.Z;
+	float d4321 = p43.X * p21.X + p43.Y * p21.Y + p43.Z * p21.Z;
+	float d1321 = p13.X * p21.X + p13.Y * p21.Y + p13.Z * p21.Z;
+	float d4343 = p43.X * p43.X + p43.Y * p43.Y + p43.Z * p43.Z;
+	float d2121 = p21.X * p21.X + p21.Y * p21.Y + p21.Z * p21.Z;
+
+	float denom = d2121 * d4343 - d4321 * d4321;
+	if (abs(denom) < EPS) return false;
+
+	return true;
 }
