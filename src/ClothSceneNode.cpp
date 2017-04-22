@@ -30,13 +30,13 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 	int i = 0;
 	for (int x = 0; x < width-1; ++x) {
 		for (int y = 0; y < height-1; ++y) {
-			buf->Indices[i+0] = idx2dTo1d(x,y);
-			buf->Indices[i+1] = idx2dTo1d(x+1,y);
-			buf->Indices[i+2] = idx2dTo1d(x,y+1);
+			buf->Indices[i+0] = m_Cloth->idx2Dto1D(x,y);
+			buf->Indices[i+1] = m_Cloth->idx2Dto1D(x+1,y);
+			buf->Indices[i+2] = m_Cloth->idx2Dto1D(x,y+1);
 
-			buf->Indices[i+3] = idx2dTo1d(x,y+1);
-			buf->Indices[i+4] = idx2dTo1d(x+1,y);
-			buf->Indices[i+5] = idx2dTo1d(x+1,y+1);
+			buf->Indices[i+3] = m_Cloth->idx2Dto1D(x,y+1);
+			buf->Indices[i+4] = m_Cloth->idx2Dto1D(x+1,y);
+			buf->Indices[i+5] = m_Cloth->idx2Dto1D(x+1,y+1);
 
 			// copy for triangle iterator
 			m_Cloth->addTriangleIndex(buf->Indices[i+0]);
@@ -138,9 +138,4 @@ void ClothSceneNode::setDirty()
 	// buffer are also updated, see IMesh::setHardwareMappingHint
 	m_Mesh->setDirty();
 	m_Mesh->recalculateBoundingBox();
-}
-
-int ClothSceneNode::idx2dTo1d(int x, int y)
-{
-	return x + y*m_Cloth->getWidth();
 }

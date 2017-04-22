@@ -33,7 +33,6 @@ private:
 
 	void updateVertices(scene::SMeshBuffer* buffer);
 	void updateNormals(scene::SMeshBuffer* buffer);
-	inline int idx2dTo1d(int x, int y);
 	void setDirty();
 };
 

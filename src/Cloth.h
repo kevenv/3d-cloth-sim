@@ -27,6 +27,15 @@ public:
 	void pinAll(bool pinned = true);
 	inline std::vector<int>& getTriangleIndices() { return m_TriangleIndices; }
 	void addTriangleIndex(int idx);
+	inline void idx1Dto2D(int idx, int& x, int& y)
+	{
+		x = idx % m_Width;
+		y = idx / m_Width;
+	}
+	inline int idx2Dto1D(int x, int y)
+	{
+		return x + y * m_Width;
+	}
 
 private:
 	std::vector<Spring> m_Springs;
@@ -42,15 +51,6 @@ private:
 	core::vector3df m_Rotation;
 
 	void addNeighbor(int x, int y, Particle* p1, float k, float b);
-	inline void idx1Dto2D(int idx, int& x, int& y)
-	{
-		x = idx % m_Width;
-		y = idx / m_Width;
-	}
-	inline int idx2Dto1D(int x, int y)
-	{
-		return x + y * m_Width;
-	}
 };
 
 #endif
