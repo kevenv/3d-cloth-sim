@@ -7,6 +7,7 @@ using namespace irr;
 
 class ClothSceneNode;
 class Cloth;
+class Particle;
 
 class ClothRenderer
 {
@@ -21,6 +22,11 @@ public:
 private:
 	scene::ISceneManager* m_smgr;
 	std::vector<ClothSceneNode*> m_ClothNodes;
+	std::vector<Particle*> m_Particles;
+	std::vector<scene::IMeshSceneNode*> m_ParticleNodes;
+	scene::IMesh* m_ParticleMesh;
+
+	scene::IMeshSceneNode* createParticleNode();
 };
 
 #endif
