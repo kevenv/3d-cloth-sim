@@ -25,8 +25,6 @@ public:
 	void pinDownCorners(bool pinned = true);
 	void pinAllCorners(bool pinned = true);
 	void pinAll(bool pinned = true);
-	inline std::vector<int>& getTriangleIndices() { return m_TriangleIndices; }
-	void addTriangleIndex(int idx);
 	inline void idx1Dto2D(int idx, int& x, int& y)
 	{
 		x = idx % m_Width;
@@ -44,8 +42,6 @@ private:
 	int m_Width;
 	int m_Height;
 	float m_Resolution;
-
-	std::vector<int> m_TriangleIndices;
 
 	core::vector3df m_Position;
 	core::vector3df m_Rotation;

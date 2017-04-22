@@ -38,14 +38,6 @@ ClothSceneNode::ClothSceneNode(Cloth* cloth, scene::ISceneNode* parent, scene::I
 			buf->Indices[i+4] = m_Cloth->idx2Dto1D(x+1,y);
 			buf->Indices[i+5] = m_Cloth->idx2Dto1D(x+1,y+1);
 
-			// copy for triangle iterator
-			m_Cloth->addTriangleIndex(buf->Indices[i+0]);
-			m_Cloth->addTriangleIndex(buf->Indices[i+1]);
-			m_Cloth->addTriangleIndex(buf->Indices[i+2]);
-			m_Cloth->addTriangleIndex(buf->Indices[i+3]);
-			m_Cloth->addTriangleIndex(buf->Indices[i+4]);
-			m_Cloth->addTriangleIndex(buf->Indices[i+5]);
-
 			i += 6;
 		}
 	}
@@ -82,11 +74,11 @@ void ClothSceneNode::updateNormals(scene::SMeshBuffer* buffer)
 		buffer->getNormal(i).set(0.f, 0.f, 0.f);
 	}
 
-	auto& indices = m_Cloth->getTriangleIndices();
-	for (int i = 0; i < indices.size(); i += 3) {
-		video::S3DVertex& a = buffer->Vertices[indices[i + 0]];
-		video::S3DVertex& b = buffer->Vertices[indices[i + 1]];
-		video::S3DVertex& c = buffer->Vertices[indices[i + 2]];
+	int nIndices = buffer->getIndexCount();
+	for (int i = 0; i < nIndices; i += 3) {
+		video::S3DVertex& a = buffer->Vertices[buffer->Indices[i + 0]];
+		video::S3DVertex& b = buffer->Vertices[buffer->Indices[i + 1]];
+		video::S3DVertex& c = buffer->Vertices[buffer->Indices[i + 2]];
 		
 		//calc normal
 		core::vector3df U(b.Pos - a.Pos);
