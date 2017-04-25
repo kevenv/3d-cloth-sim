@@ -6,6 +6,7 @@
 #include "Particle.h"
 #include "Cloth.h"
 #include <math.h>
+#include <assert.h>
 #include "lineintersect_utils.h"
 
 CollisionsHandler::CollisionsHandler()
@@ -20,60 +21,42 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	//applyRepulsionsForces(sim, dt);
+	applyRepulsionsForces(sim, dt);
 	resolveCollisions(sim, dt);
 }
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
-	//todo: create a static array of all particles in all springs of all cloths
 	auto& springs = clothSim.getSprings();
 	for (auto* sA : springs) {
 		Particle* p0 = sA->getP1();
 		Particle* p1 = sA->getP2();
-		core::vector3df& x0 = p0->p;
-		core::vector3df& x1 = p1->p;
 
 		for (auto* sB : springs) {
 			if (sA != sB) {
 				Particle* p2 = sB->getP1();
 				Particle* p3 = sB->getP2();
-				core::vector3df& x2 = p2->p;
-				core::vector3df& x3 = p3->p;
 
-				if (p0 == p1 || p2 == p3) {
-					static bool once = false;
-					if (!once) {
-						once = true;
-						p0->pinned = true;
-						p1->pinned = true;
-						p2->pinned = true;
-						p3->pinned = true;
-					}
-				}
+				assert(p0 != p1 || p2 != p3);
 
 				if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
 
 				core::vector3df N;
 				float a, b;
-				if (testEdgeEdge(x0, x1, x2, x3, a, b, N)) {
+				if (testEdgeEdge(p0->p, p1->p, p2->p, p3->p, a, b, N)) {
 					//apply repulsion force
-					static bool once = false;
-					if (!once) {
-						once = true;
-						p0->pinned = true;
-						p1->pinned = true;
-						p2->pinned = true;
-						p3->pinned = true;
-					}
+					p0->pinned = true;
+					p1->pinned = true;
+					p2->pinned = true;
+					p3->pinned = true;
 				}
 			}
 		}
 	}
 
 	auto& particles = clothSim.getParticles();
+	auto& pTriangles = clothSim.getTriangleParticles();
 	for (auto* p : particles) {
-		auto& pTriangles = clothSim.getTriangleParticles();
 		for (int i = 0; i < pTriangles.size(); i+=3) {
 			Particle* pA = pTriangles[i + 0];
 			Particle* pB = pTriangles[i + 1];
@@ -99,53 +82,93 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 	while (!resolved && iterations < 1000) {
 		resolved = true;
 
-		//todo: create a static array of all particles in all springs of all cloths
 		auto& springs = clothSim.getSprings();
 		for (auto* sA : springs) {
-			core::vector3df& x0 = sA->getP1()->p;
-			core::vector3df& x1 = sA->getP2()->p;
+			Particle* p0 = sA->getP1();
+			Particle* p1 = sA->getP2();
+
 			for (auto* sB : springs) {
 				if (sA != sB) {
-					core::vector3df& x2 = sB->getP1()->p;
-					core::vector3df& x3 = sB->getP2()->p;
+					Particle* p2 = sB->getP1();
+					Particle* p3 = sB->getP2();
 
+					assert(p0 != p1 || p2 != p3);
+
+					if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
+
+					// find t*
 					core::vector3df x[4];
+					x[0] = p0->p; x[1] = p1->p; x[2] = p2->p; x[3] = p3->p;
 					core::vector3df v[4];
+					v[0] = p0->v; v[1] = p1->v; v[2] = p2->v; v[3] = p3->v;
 					float t = solveCollisionTime(x, v, dt);
+					if (t < 0) continue;
 
+					if (t != 0) {
+						volatile int t = 0;
+						t++;
+					}
+
+					// set p to t*
+					core::vector3df p0New(p0->p + p0->v*t);
+					core::vector3df p1New(p1->p + p1->v*t);
+					core::vector3df p2New(p2->p + p2->v*t);
+					core::vector3df p3New(p3->p + p3->v*t);
+					
 					core::vector3df N;
 					float a, b;
-					if (testEdgeEdge(x0, x1, x2, x3, a, b, N)) {
+					if (testEdgeEdge(p0New, p1New, p2New, p3New, a, b, N)) {
 						//apply repulsion force
-						sA->getP1()->p += 3.0f;
+						p0->pinned = true;
+						p1->pinned = true;
+						p2->pinned = true;
+						p3->pinned = true;
 					}
 				}
 			}
 		}
 
 		auto& particles = clothSim.getParticles();
+		auto& pTriangles = clothSim.getTriangleParticles();
 		for (auto* p : particles) {
-			auto& pTriangles = clothSim.getTriangleParticles();
 			for (int i = 0; i < pTriangles.size(); i += 3) {
 				Particle* pA = pTriangles[i + 0];
 				Particle* pB = pTriangles[i + 1];
 				Particle* pC = pTriangles[i + 2];
 
-				core::vector3df x[4];
-				core::vector3df v[4];
-				float t = solveCollisionTime(x, v, dt);
-
 				if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
-					if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
+					// find t*
+					core::vector3df x[4];
+					x[0] = pA->p; x[1] = pB->p; x[2] = pC->p; x[3] = p->p;
+					core::vector3df v[4];
+					v[0] = pA->v; v[1] = pB->v; v[2] = pC->v; v[3] = p->v;
+					float t = solveCollisionTime(x, v, dt);
+					if (t < 0) continue;
+
+					if (t != 0) {
+						volatile int t = 0;
+						t++;
+					}
+
+					// get p to t*
+					core::vector3df pNew(p->p + p->v*t);
+					core::vector3df pANew(pA->p + pA->v*t);
+					core::vector3df pBNew(pB->p + pB->v*t);
+					core::vector3df pCNew(pC->p + pC->v*t);
+
+					if (testPointTriangle(pNew, pANew, pBNew, pCNew)) {
 						//apply repulsion force
-						p->p += 3.0f;
+						p->pinned = true;
+						pA->pinned = true;
+						pB->pinned = true;
+						pC->pinned = true;
 					}
 				}
 			}
 		}
-
+		
 		// collisions detection
-		resolved = true;
+		resolved = true; //todo: implement iterative solver
 
 		iterations++;
 	}
