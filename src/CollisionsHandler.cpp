@@ -27,6 +27,26 @@ void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
+	auto& particles = clothSim.getParticles();
+	auto& pTriangles = clothSim.getTriangleParticles();
+	for (auto* p : particles) {
+		for (int i = 0; i < pTriangles.size(); i+=3) {
+			Particle* pA = pTriangles[i + 0];
+			Particle* pB = pTriangles[i + 1];
+			Particle* pC = pTriangles[i + 2];
+
+			if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
+				if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
+					//apply repulsion force
+					p->pinned = true;
+					pA->pinned = true;
+					pB->pinned = true;
+					pC->pinned = true;
+				}
+			}
+		}
+	}
+
 	auto& springs = clothSim.getSprings();
 	for (auto* sA : springs) {
 		Particle* p0 = sA->getP1();
@@ -53,26 +73,6 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 			}
 		}
 	}
-
-	auto& particles = clothSim.getParticles();
-	auto& pTriangles = clothSim.getTriangleParticles();
-	for (auto* p : particles) {
-		for (int i = 0; i < pTriangles.size(); i+=3) {
-			Particle* pA = pTriangles[i + 0];
-			Particle* pB = pTriangles[i + 1];
-			Particle* pC = pTriangles[i + 2];
-
-			if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
-				if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
-					//apply repulsion force
-					p->pinned = true;
-					pA->pinned = true;
-					pB->pinned = true;
-					pC->pinned = true;
-				}
-			}
-		}
-	}
 }
 
 void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
@@ -81,52 +81,6 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 	int iterations = 0;
 	while (!resolved && iterations < 1000) {
 		resolved = true;
-
-		auto& springs = clothSim.getSprings();
-		for (auto* sA : springs) {
-			Particle* p0 = sA->getP1();
-			Particle* p1 = sA->getP2();
-
-			for (auto* sB : springs) {
-				if (sA != sB) {
-					Particle* p2 = sB->getP1();
-					Particle* p3 = sB->getP2();
-
-					assert(p0 != p1 || p2 != p3);
-
-					if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
-
-					// find t*
-					core::vector3df x[4];
-					x[0] = p0->p; x[1] = p1->p; x[2] = p2->p; x[3] = p3->p;
-					core::vector3df v[4];
-					v[0] = p0->v; v[1] = p1->v; v[2] = p2->v; v[3] = p3->v;
-					float t = solveCollisionTime(x, v, dt);
-					if (t < 0) continue;
-
-					if (t != 0) {
-						volatile int t = 0;
-						t++;
-					}
-
-					// set p to t*
-					core::vector3df p0New(p0->p + p0->v*t);
-					core::vector3df p1New(p1->p + p1->v*t);
-					core::vector3df p2New(p2->p + p2->v*t);
-					core::vector3df p3New(p3->p + p3->v*t);
-					
-					core::vector3df N;
-					float a, b;
-					if (testEdgeEdge(p0New, p1New, p2New, p3New, a, b, N)) {
-						//apply repulsion force
-						p0->pinned = true;
-						p1->pinned = true;
-						p2->pinned = true;
-						p3->pinned = true;
-					}
-				}
-			}
-		}
 
 		auto& particles = clothSim.getParticles();
 		auto& pTriangles = clothSim.getTriangleParticles();
@@ -162,6 +116,52 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 						pA->pinned = true;
 						pB->pinned = true;
 						pC->pinned = true;
+					}
+				}
+			}
+		}
+
+		auto& springs = clothSim.getSprings();
+		for (auto* sA : springs) {
+			Particle* p0 = sA->getP1();
+			Particle* p1 = sA->getP2();
+
+			for (auto* sB : springs) {
+				if (sA != sB) {
+					Particle* p2 = sB->getP1();
+					Particle* p3 = sB->getP2();
+
+					assert(p0 != p1 || p2 != p3);
+
+					if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
+
+																				// find t*
+					core::vector3df x[4];
+					x[0] = p0->p; x[1] = p1->p; x[2] = p2->p; x[3] = p3->p;
+					core::vector3df v[4];
+					v[0] = p0->v; v[1] = p1->v; v[2] = p2->v; v[3] = p3->v;
+					float t = solveCollisionTime(x, v, dt);
+					if (t < 0) continue;
+
+					if (t != 0) {
+						volatile int t = 0;
+						t++;
+					}
+
+					// set p to t*
+					core::vector3df p0New(p0->p + p0->v*t);
+					core::vector3df p1New(p1->p + p1->v*t);
+					core::vector3df p2New(p2->p + p2->v*t);
+					core::vector3df p3New(p3->p + p3->v*t);
+
+					core::vector3df N;
+					float a, b;
+					if (testEdgeEdge(p0New, p1New, p2New, p3New, a, b, N)) {
+						//apply repulsion force
+						p0->pinned = true;
+						p1->pinned = true;
+						p2->pinned = true;
+						p3->pinned = true;
 					}
 				}
 			}
