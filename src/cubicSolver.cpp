@@ -12,11 +12,18 @@
 
 int cubic_solver(float a, float b, float c, float d, float* roots)
 {
-	if (equals(a,0,1E-6f)) {
+	if (equals(a, 0,1E-6f)) {
 		if (equals(b, 0, 1E-6f)) {
-			// linear
-			roots[0] = -d / c;
-			return 1;
+			if (equals(c, 0, 1E-6f)) {
+				// constant
+				roots[0] = d;
+				return 1;
+			}
+			else {
+				// linear
+				roots[0] = -d / c;
+				return 1;
+			}
 		}
 		else {
 			// quadratic
@@ -49,8 +56,8 @@ int cubic_solver(float a, float b, float c, float d, float* roots)
 
 int cubic_bracket_roots(float a, float b, float c, float d, float intervals[3][2])
 {
-	const float min = -4.0f;
-	const float max = 4.0f;
+	const float min = -0.5f;
+	const float max = 1.5f;
 
 	// find critical points
 	//   critical points are x when f'(x) = 0
