@@ -6,6 +6,7 @@
 #include "Particle.h"
 #include "Cloth.h"
 #include <math.h>
+#include "lineintersect_utils.h"
 
 CollisionsHandler::CollisionsHandler()
 {
@@ -53,8 +54,9 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 
 				if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
 
-				core::vector3df pa,pb;
-				if (testEdgeEdge(x0, x1, x2, x3, pa, pb)) {
+				core::vector3df N;
+				float a, b;
+				if (testEdgeEdge(x0, x1, x2, x3, a, b, N)) {
 					//apply repulsion force
 					static bool once = false;
 					if (!once) {
@@ -111,7 +113,9 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 					core::vector3df v[4];
 					float t = solveCollisionTime(x, v, dt);
 
-					if (testEdgeEdge(x0, x1, x2, x3)) {
+					core::vector3df N;
+					float a, b;
+					if (testEdgeEdge(x0, x1, x2, x3, a, b, N)) {
 						//apply repulsion force
 						sA->getP1()->p += 3.0f;
 					}
@@ -254,36 +258,46 @@ bool CollisionsHandler::testPointTriangle(core::vector3df& p, core::vector3df& a
 /*
 	p1,p2 = Edge 1
 	p3,p4 = Edge 2
+	a = nearest pt on edge 1 (relative to edge 1)
+	b = nearest pt on edge 2 (relative to edge 2)
+	N = Collision Normal
 
-	From: Paul Bourke (http://paulbourke.net/geometry/pointlineplane/)
+	From: "Fast, Robust Intersection of 3D Line Segments", Graham Rhodes, Game Programming Gems II, 2001
 */
-bool CollisionsHandler::testEdgeEdge(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4, core::vector3df& pa, core::vector3df& pb)
+bool CollisionsHandler::testEdgeEdge(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4, float& a, float &b, core::vector3df& N)
 {
-	core::vector3df p13(p1 - p3);
-	core::vector3df p43(p4 - p3);
-	core::vector3df p21(p2 - p1);
-	if (abs(p43.X) < H && abs(p43.Y) < H && abs(p43.Z) < H)
-		return false;
-	if (abs(p21.X) < H && abs(p21.Y) < H && abs(p21.Z) < H)
-		return false;
+	bool intersects;
+	core::vector3df intPt;
+	core::vector3df pa, pb;
+	IntersectLineSegments(p1.X, p1.Y, p1.Z, p2.X, p2.Y, p2.Z, 
+                          p3.X, p3.Y, p3.Z, p4.X, p4.Y, p4.Z,
+                          false /*infinite lines*/, DELTA,
 
-	float d1343 = p13.dotProduct(p43);
-	float d4321 = p43.dotProduct(p21);
-	float d1321 = p13.dotProduct(p21);
-	float d4343 = p43.dotProduct(p43);
-	float d2121 = p21.dotProduct(p21);
+                          pa.X, pa.Y, pa.Z, pb.X, pb.Y, pb.Z,
+                          intPt.X, intPt.Y, intPt.Z,
+						  N.X, N.Y, N.Z,
+					      intersects);
+	if (intersects) {
+		N.normalize();
+		core::vector3df p12(p1 - p2);
+		core::vector3df p34(p3 - p4);
+		core::vector3df p1a(p1 - pa);
+		core::vector3df p3b(p3 - pb);
+		a = 0.0f;
+		b = 0.0f;
+		if (!p1a.equals(core::vector3df(0.0f, 0.0f, 0.0f))) {
+			float p12l = p12.getLength();
+			p12.normalize();
+			p1a /= p12l;
+			a = p1a.getLength();
+		}
+		if (!p3b.equals(core::vector3df(0.0f, 0.0f, 0.0f))) {
+			float p34l = p34.getLength();
+			p34.normalize();
+			p3b /= p34l;
+			b = p3b.getLength();
+		}
+	}
 
-	float denom = d2121 * d4343 - d4321 * d4321;
-	if (abs(denom) < H)
-		return false;
-	float numer = d1343 * d4321 - d1321 * d4343;
-
-	float mua = numer / denom;
-	float mub = (d1343 + d4321 * mua) / d4343;
-
-	pa = p1 + mua * p21;
-	pb = p3 + mub * p43;
-
-	float d = pa.getDistanceFrom(pb);
-	return d < H;
+	return intersects;
 }

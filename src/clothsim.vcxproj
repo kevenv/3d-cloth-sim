@@ -223,6 +223,7 @@
     <ClCompile Include="CollisionsHandler.cpp" />
     <ClCompile Include="COrientationAxisSceneNode.cpp" />
     <ClCompile Include="cubicSolver.cpp" />
+    <ClCompile Include="lineintersect_utils.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -250,6 +251,7 @@
     <ClInclude Include="CollisionsHandler.h" />
     <ClInclude Include="COrientationAxisSceneNode.h" />
     <ClInclude Include="cubicSolver.h" />
+    <ClInclude Include="lineintersect_utils.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Spring.h" />
   </ItemGroup>

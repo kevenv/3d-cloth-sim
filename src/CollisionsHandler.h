@@ -27,7 +27,7 @@ private:
 	core::vector3df computeNormalEdges(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4);
 	void computeBarycentricCoords(core::vector3df& p, core::vector3df& a, core::vector3df& b, core::vector3df& c, float& u, float& v, float& w);
 	bool testPointTriangle(core::vector3df& p, core::vector3df& a, core::vector3df& b, core::vector3df& c);
-	bool testEdgeEdge(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4, core::vector3df& pa, core::vector3df& pb);
+	bool testEdgeEdge(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4, float& a, float& b, core::vector3df& N);
 };
 
 #endif
