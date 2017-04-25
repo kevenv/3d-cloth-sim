@@ -19,6 +19,8 @@ public:
 	void close();
 	void update();
 
+	Particle* getParticleFromNode(scene::ISceneNode* node);
+
 private:
 	scene::ISceneManager* m_smgr;
 	std::vector<ClothSceneNode*> m_ClothNodes;

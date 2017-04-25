@@ -17,6 +17,16 @@ using namespace irr;
 class MyEventReceiver : public IEventReceiver
 {
 public:
+	// We'll create a struct to record info on the mouse state
+	struct SMouseState
+	{
+		core::position2di oldPosition;
+		core::position2di position;
+		core::position2di dv;
+		bool LeftButtonDown;
+		bool Moved;
+		SMouseState() : LeftButtonDown(false), Moved(false) { }
+	} MouseState;
 
 	MyEventReceiver(IrrlichtDevice* device) :
 		device(device)
@@ -26,6 +36,43 @@ public:
 
 	bool OnEvent(const SEvent& event)
 	{
+		// Remember the mouse state
+		if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
+		{
+			switch (event.MouseInput.Event)
+			{
+			case EMIE_LMOUSE_PRESSED_DOWN:
+				MouseState.LeftButtonDown = true;
+				break;
+
+			case EMIE_LMOUSE_LEFT_UP:
+				MouseState.LeftButtonDown = false;
+				break;
+
+			case EMIE_MOUSE_MOVED:
+				MouseState.oldPosition = MouseState.position;
+				
+				MouseState.position.X = event.MouseInput.X;
+				MouseState.position.Y = event.MouseInput.Y;
+
+				if (!MouseState.oldPosition.equals(MouseState.position)) {
+					MouseState.Moved = true;
+					MouseState.dv = MouseState.oldPosition - MouseState.position;
+				}
+				else {
+					MouseState.Moved = false;
+					MouseState.dv.X = 0;
+					MouseState.dv.Y = 0;
+				}
+				
+				break;
+
+			default:
+				// We won't use the wheel
+				break;
+			}
+		}
+
 		if (event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
 		{
 			switch (event.KeyInput.Key)
@@ -71,14 +118,14 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
 	// add camera
-	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS(0, 100.0f, 1.2f);
-	//smgr->addCameraSceneNodeMaya(0, 100.0f, 1.2f);
+	//scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS(0, 100.0f, 1.2f);
+	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeMaya(0, 100.0f, 1.2f);
 	camera->setPosition(core::vector3df(0,750,-879));
 	camera->setTarget(core::vector3df(13, 105, 80));
 	camera->setFarValue(42000.0f);
 
 	// disable mouse cursor
-	device->getCursorControl()->setVisible(false);
+	//device->getCursorControl()->setVisible(false);
 
 	// floor
 	core::dimension2df tileSize(256,256);
@@ -150,6 +197,10 @@ int main()
 	MyEventReceiver receiver(device);
 	device->setEventReceiver(&receiver);
 
+	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
+	Particle* selectedParticle = NULL;
+	core::vector2di clickPos;
+
 	/*
 	That's it, draw everything.
 	*/
@@ -159,6 +210,60 @@ int main()
 	while(device->run())
 	if (device->isWindowActive())
 	{
+		if (receiver.MouseState.LeftButtonDown) {
+			core::line3d<f32> ray = collMan->getRayFromScreenCoordinates(device->getCursorControl()->getPosition(), camera);
+			core::vector3df intersection; // Tracks the current intersection point with the level or a mesh
+			core::triangle3df hitTriangle; // Used to show with triangle has been hit
+			scene::ISceneNode * selectedSceneNode = collMan->getSceneNodeAndCollisionPointFromRay(
+				ray,
+				intersection, // This will be the position of the collision
+				hitTriangle, // This will be the triangle hit in the collision
+				1, // This ensures that only nodes that we have
+				   // set up to be pickable are considered
+				0); // Check the entire scene (this is actually the implicit default)
+			if (!selectedParticle && selectedSceneNode)
+			{
+				selectedParticle = clothRenderer.getParticleFromNode(selectedSceneNode);
+				if (selectedParticle) {
+					camera->setInputReceiverEnabled(false);
+					clickPos = receiver.MouseState.position;
+				}
+			}
+		}
+		else {
+			selectedParticle = NULL;
+			camera->setInputReceiverEnabled(true);
+		}
+
+		if (selectedParticle && receiver.MouseState.Moved) {
+			core::vector2di dv = clickPos - receiver.MouseState.position;
+
+			core::matrix4 viewMat;
+			core::matrix4 projMat;
+
+			/*float x = (2.0f * dv.X) / 800 - 1.0f;
+			float y = 1.0f - (2.0f * dv.Y) / 600;
+			float z = -1.0f;
+			core::vector3df ray_clip(x, y, z);
+			
+			camera->getProjectionMatrix().getInverse(projMat);
+			camera->getViewMatrix().getInverse(viewMat);
+			projMat.transformVect(ray_clip);
+			ray_clip.Z = -1.0f;
+			viewMat.transformVect(ray_clip);
+			ray_clip.normalize();*/
+
+			camera->getProjectionMatrix().getInverse(projMat);
+			camera->getViewMatrix().getInverse(viewMat);
+			projMat *= viewMat;
+
+			core::vector3df v(dv.X, dv.Y, 0.0f);
+			projMat.transformVect(v);
+
+			std::cout << v.X << "," << v.Y << "," << v.Z << std::endl;
+			selectedParticle->addForce(v*2.5f);
+		}
+		
 		clothSimulator.update();
 		clothRenderer.update();
 

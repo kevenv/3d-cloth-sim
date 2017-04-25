@@ -69,3 +69,14 @@ scene::IMeshSceneNode* ClothRenderer::createParticleNode()
 
 	return node;
 }
+
+Particle* ClothRenderer::getParticleFromNode(scene::ISceneNode* node)
+{
+	for (int i = 0; i < m_ParticleNodes.size(); ++i) { //todo: use map instead
+		if (m_ParticleNodes[i] == node) {
+			return m_Particles[i];
+		}
+	}
+
+	return NULL;
+}
