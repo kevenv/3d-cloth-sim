@@ -21,8 +21,8 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	applyRepulsionsForces(sim, dt);
-	//resolveCollisions(sim, dt);
+	//applyRepulsionsForces(sim, dt);
+	resolveCollisions(sim, dt);
 }
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
@@ -161,11 +161,22 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 	computeNewPos(p, pA, pB, pC, t, pNew, pANew, pBNew, pCNew);
 
 	if (testPointTriangle(pNew, pANew, pBNew, pCNew)) {
-		//apply repulsion force
-		p->pinned = true;
-		pA->pinned = true;
-		pB->pinned = true;
-		pC->pinned = true;
+
+		float w1, w2, w3;
+		computeBarycentricCoords(pNew, pANew, pBNew, pCNew, w1, w2, w3); // todo: computed 2 times
+		core::vector3df N = computeNormalTriangle(pNew, pANew, pBNew, pCNew); // todo: computed 2 times
+		core::vector3df T = computeTangent(N);
+		float d = H - (pNew - w1*pANew - w2*pBNew - w3*pCNew).dotProduct(N);
+		if (d < 0.0f) return true; //outside
+
+		float Vrn, Vrt;
+		computeRelVel_PointTriangle(p, pA, pB, pC, w1, w2, w3, N, T, Vrn, Vrt);
+		if (Vrn >= 0.1*d / dt) {
+			return true; //things are going to sort themselves out
+		}
+
+		float I = 0.0f;//todo:
+		applyImpulsion_PointTriangle(p, pA, pB, pC, N, w1, w2, w3, I);
 	}
 
 	return false;
@@ -188,11 +199,20 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 	float a, b;
 	core::vector3df N;
 	if (testEdgeEdge(p1New, p2New, p3New, p4New, a, b, N)) {
-		//apply repulsion force
-		p1->pinned = true;
-		p2->pinned = true;
-		p3->pinned = true;
-		p4->pinned = true;
+		
+		N = computeNormalEdges(p1New, p2New, p3New, p4New);
+		core::vector3df T = computeTangent(N);
+		float d = H - ((1 - a)*p1New + a*p2New - (1 - b)*p3New - b*p4New).dotProduct(N);
+		if (d < 0.0f) return true; //outside
+
+		float Vrn, Vrt;
+		computeRelVel_EdgeEdge(p1, p2, p3, p4, a, b, N, T, Vrn, Vrt);
+		if (Vrn >= 0.1*d / dt) {
+			return true; //things are going to sort themselves out
+		}
+
+		float I = 0.0f;//todo:
+		applyImpulsion_EdgeEdge(p1, p2, p3, p4, N, a, b, I);
 	}
 
 	return false;
