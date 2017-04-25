@@ -29,6 +29,8 @@ int cubic_solver(float a, float b, float c, float d, float* roots)
 	// bracket roots (intervals where there could be a root)
 	float intervals[3][2] = { 0 };
 	int nIntervals = cubic_bracket_roots(a,b,c,d, intervals);
+
+	// todo: check if root on interval directly
 	
 	// find roots
 	int ri = 0;

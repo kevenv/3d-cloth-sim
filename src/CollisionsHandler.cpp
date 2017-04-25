@@ -19,44 +19,89 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
+	/*
+	core::vector3df x1(0.0f, 0.0f, 0.0f);
+	core::vector3df x2(0.0f, 1.0f, 0.0f);
+	core::vector3df x3(-0.5f, -0.5f, 0.0f);
+	core::vector3df x4(0.5f, 0.5f, 0.0f);
+	*/
+	/*core::vector3df x1(0.0f, 0.0f, 0.0f);
+	core::vector3df x2(0.0f, 1.0f, 0.0f);
+	core::vector3df x3(-0.5f, -0.5f, 0.0f);
+	core::vector3df x4(0.5f, 0.5f, 0.0f);
+	x3 += 0.2; x4 += 0.2;
+	core::matrix4 m;
+	m.setRotationDegrees(core::vector3df(0.0f,-45.0f,0.0f));
+	m.rotateVect(x3);
+	m.rotateVect(x4);
+	if (testEdgeEdge(x1, x2, x3, x4)) {
+		volatile int t = 3;
+	}*/
+
 	applyRepulsionsForces(sim, dt);
-	resolveCollisions(sim, dt);
+	//resolveCollisions(sim, dt);
 }
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
 	//todo: create a static array of all particles in all springs of all cloths
-	auto& springs = clothSim.getSprings();
+	/*auto& springs = clothSim.getSprings();
 	for (auto* sA : springs) {
-		core::vector3df& x0 = sA->getP1()->p;
-		core::vector3df& x1 = sA->getP2()->p;
+		Particle* p0 = sA->getP1();
+		Particle* p1 = sA->getP2();
+		core::vector3df& x0 = p0->p;
+		core::vector3df& x1 = p1->p;
+
 		for (auto* sB : springs) {
 			if (sA != sB) {
-				core::vector3df& x2 = sB->getP1()->p;
-				core::vector3df& x3 = sB->getP2()->p;
+				Particle* p2 = sB->getP1();
+				Particle* p3 = sB->getP2();
+				core::vector3df& x2 = p2->p;
+				core::vector3df& x3 = p3->p;
+
+				if (p0 == p1 || p2 == p3) {
+					static bool once = false;
+					if (!once) {
+						once = true;
+						p0->pinned = true;
+						p1->pinned = true;
+						p2->pinned = true;
+						p3->pinned = true;
+					}
+				}
+
+				if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
+
 				if (testEdgeEdge(x0, x1, x2, x3)) {
 					//apply repulsion force
-					sA->getP1()->p += 0.0f;
+					static bool once = false;
+					if (!once) {
+						once = true;
+						p0->pinned = true;
+						p1->pinned = true;
+						p2->pinned = true;
+						p3->pinned = true;
+					}
 				}
 			}
 		}
-	}
+	}*/
 
 	auto& particles = clothSim.getParticles();
 	for (auto* p : particles) {
-		auto& cloths = clothSim.getCloths();
-		for (auto* c : cloths) { //todo: create a list of all triangles for all cloths
-			auto& indices = c->getTriangleIndices();
-			for (int i = 0; i < indices.size(); i+=3) {
-				auto& pCloth = c->getParticles();
-				core::vector3df* x1 = &pCloth[indices[i + 0]].p;
-				core::vector3df* x2 = &pCloth[indices[i + 1]].p;
-				core::vector3df* x3 = &pCloth[indices[i + 2]].p;
-				if (!partOfTriangle(&p->p, x1, x2, x3)) {
-					if (testPointTriangle(p->p, *x1, *x2, *x3)) {
-						//apply repulsion force
-						p->p += 0.0f;
-					}
+		auto& pTriangles = clothSim.getTriangleParticles();
+		for (int i = 0; i < pTriangles.size(); i+=3) {
+			Particle* pA = pTriangles[i + 0];
+			Particle* pB = pTriangles[i + 1];
+			Particle* pC = pTriangles[i + 2];
+			
+			if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
+				if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
+					//apply repulsion force
+					p->pinned = true;
+					pA->pinned = true;
+					pB->pinned = true;
+					pC->pinned = true;
 				}
 			}
 		}
@@ -94,24 +139,20 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 
 		auto& particles = clothSim.getParticles();
 		for (auto* p : particles) {
-			auto& cloths = clothSim.getCloths();
-			for (auto* c : cloths) { //todo: create a list of all triangles for all cloths
-				auto& indices = c->getTriangleIndices();
-				for (int i = 0; i < indices.size(); i += 3) {
-					auto& pCloth = c->getParticles();
-					core::vector3df* x1 = &pCloth[indices[i + 0]].p;
-					core::vector3df* x2 = &pCloth[indices[i + 1]].p;
-					core::vector3df* x3 = &pCloth[indices[i + 2]].p;
+			auto& pTriangles = clothSim.getTriangleParticles();
+			for (int i = 0; i < pTriangles.size(); i += 3) {
+				Particle* pA = pTriangles[i + 0];
+				Particle* pB = pTriangles[i + 1];
+				Particle* pC = pTriangles[i + 2];
 
-					core::vector3df x[4];
-					core::vector3df v[4];
-					float t = solveCollisionTime(x, v, dt);
+				core::vector3df x[4];
+				core::vector3df v[4];
+				float t = solveCollisionTime(x, v, dt);
 
-					if (!partOfTriangle(&p->p, x1, x2, x3)) {
-						if (testPointTriangle(p->p, *x1, *x2, *x3)) {
-							//apply repulsion force
-							p->p += 3.0f;
-						}
+				if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
+					if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
+						//apply repulsion force
+						p->p += 3.0f;
 					}
 				}
 			}
@@ -220,28 +261,31 @@ bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& 
 bool CollisionsHandler::testEdgeEdge(core::vector3df & p1, core::vector3df & p2, core::vector3df & p3, core::vector3df & p4)
 {
 	const float EPS = 1E-6f;
-	core::vector3df p13, p43, p21;
-	
-	p13.X = p1.X - p3.X;
-	p13.Y = p1.Y - p3.Y;
-	p13.Z = p1.Z - p3.Z;
-	p43.X = p4.X - p3.X;
-	p43.Y = p4.Y - p3.Y;
-	p43.Z = p4.Z - p3.Z;
-	if (abs(p43.X) < EPS && abs(p43.Y) < EPS && abs(p43.Z) < EPS) return false;
-	p21.X = p2.X - p1.X;
-	p21.Y = p2.Y - p1.Y;
-	p21.Z = p2.Z - p1.Z;
-	if (abs(p21.X) < EPS && abs(p21.Y) < EPS && abs(p21.Z) < EPS) return false;
+	core::vector3df p13(p1 - p3);
+	core::vector3df p43(p4 - p3);
+	core::vector3df p21(p2 - p1);
+	if (abs(p43.X) < EPS && abs(p43.Y) < EPS && abs(p43.Z) < EPS)
+		return false;
+	if (abs(p21.X) < EPS && abs(p21.Y) < EPS && abs(p21.Z) < EPS)
+		return false;
 
-	float d1343 = p13.X * p43.X + p13.Y * p43.Y + p13.Z * p43.Z;
-	float d4321 = p43.X * p21.X + p43.Y * p21.Y + p43.Z * p21.Z;
-	float d1321 = p13.X * p21.X + p13.Y * p21.Y + p13.Z * p21.Z;
-	float d4343 = p43.X * p43.X + p43.Y * p43.Y + p43.Z * p43.Z;
-	float d2121 = p21.X * p21.X + p21.Y * p21.Y + p21.Z * p21.Z;
+	float d1343 = p13.dotProduct(p43);
+	float d4321 = p43.dotProduct(p21);
+	float d1321 = p13.dotProduct(p21);
+	float d4343 = p43.dotProduct(p43);
+	float d2121 = p21.dotProduct(p21);
 
 	float denom = d2121 * d4343 - d4321 * d4321;
-	if (abs(denom) < EPS) return false;
+	if (abs(denom) < EPS)
+		return false;
+	float numer = d1343 * d4321 - d1321 * d4343;
 
-	return true;
+	float mua = numer / denom;
+	float mub = (d1343 + d4321 * (mua)) / d4343;
+
+	core::vector3df pa = p1 + mua * p21;
+	core::vector3df pb = p3 + mub * p43;
+
+	float d = pa.getDistanceFrom(pb);
+	return d < EPS;
 }
