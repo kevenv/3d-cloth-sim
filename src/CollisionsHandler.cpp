@@ -19,33 +19,14 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	/*
-	core::vector3df x1(0.0f, 0.0f, 0.0f);
-	core::vector3df x2(0.0f, 1.0f, 0.0f);
-	core::vector3df x3(-0.5f, -0.5f, 0.0f);
-	core::vector3df x4(0.5f, 0.5f, 0.0f);
-	*/
-	/*core::vector3df x1(0.0f, 0.0f, 0.0f);
-	core::vector3df x2(0.0f, 1.0f, 0.0f);
-	core::vector3df x3(-0.5f, -0.5f, 0.0f);
-	core::vector3df x4(0.5f, 0.5f, 0.0f);
-	x3 += 0.2; x4 += 0.2;
-	core::matrix4 m;
-	m.setRotationDegrees(core::vector3df(0.0f,-45.0f,0.0f));
-	m.rotateVect(x3);
-	m.rotateVect(x4);
-	if (testEdgeEdge(x1, x2, x3, x4)) {
-		volatile int t = 3;
-	}*/
-
-	applyRepulsionsForces(sim, dt);
-	//resolveCollisions(sim, dt);
+	//applyRepulsionsForces(sim, dt);
+	resolveCollisions(sim, dt);
 }
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
 	//todo: create a static array of all particles in all springs of all cloths
-	/*auto& springs = clothSim.getSprings();
+	auto& springs = clothSim.getSprings();
 	for (auto* sA : springs) {
 		Particle* p0 = sA->getP1();
 		Particle* p1 = sA->getP2();
@@ -72,7 +53,8 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 
 				if (p0 == p2 || p0 == p3 || p1 == p2 || p1 == p3) continue; // skip edges that share an endpoint
 
-				if (testEdgeEdge(x0, x1, x2, x3)) {
+				core::vector3df pa,pb;
+				if (testEdgeEdge(x0, x1, x2, x3, pa, pb)) {
 					//apply repulsion force
 					static bool once = false;
 					if (!once) {
@@ -85,7 +67,7 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 				}
 			}
 		}
-	}*/
+	}
 
 	auto& particles = clothSim.getParticles();
 	for (auto* p : particles) {
@@ -94,7 +76,7 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 			Particle* pA = pTriangles[i + 0];
 			Particle* pB = pTriangles[i + 1];
 			Particle* pC = pTriangles[i + 2];
-			
+
 			if (!partOfTriangle(&p->p, &pA->p, &pB->p, &pC->p)) {
 				if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
 					//apply repulsion force
@@ -213,6 +195,38 @@ float CollisionsHandler::solveCollisionTime(const core::vector3df x[4], const co
 	return root;
 }
 
+core::vector3df CollisionsHandler::computeNormalTriangle(core::vector3df& p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
+{
+	core::vector3df U(b - a);
+	core::vector3df V(c - a);
+	core::vector3df n(U.crossProduct(V));
+	n.normalize();
+	return n;
+}
+
+core::vector3df CollisionsHandler::computeNormalEdges(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4)
+{
+	core::vector3df E1(p1 - p2);
+	core::vector3df E2(p3 - p4);
+	return E1.crossProduct(E2).normalize();
+}
+
+void CollisionsHandler::computeBarycentricCoords(core::vector3df & p, core::vector3df& a, core::vector3df& b, core::vector3df& c, float& u, float& v, float& w)
+{
+	core::vector3df v0(b - a);
+	core::vector3df v1(c - a);
+	core::vector3df v2(p - a);
+	float dot00 = v0.dotProduct(v0);
+	float dot01 = v0.dotProduct(v1);
+	float dot11 = v1.dotProduct(v1);
+	float dot20 = v2.dotProduct(v0);
+	float dot21 = v2.dotProduct(v1);
+	float denom = dot00 * dot11 - dot01 * dot01;
+	v = (dot11 * dot20 - dot01 * dot21) / denom;
+	w = (dot00 * dot21 - dot01 * dot20) / denom;
+	u = 1.0f - v - w;
+}
+
 bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* a, core::vector3df* b, core::vector3df* c)
 {
 	return p == a || p == b || p == c;
@@ -224,32 +238,17 @@ bool CollisionsHandler::partOfTriangle(core::vector3df* p, core::vector3df* a, c
 
 	From: Real Time Collision Detection, Christer Ericson, p.47
 */
-bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
+bool CollisionsHandler::testPointTriangle(core::vector3df& p, core::vector3df& a, core::vector3df& b, core::vector3df& c)
 {
 	core::vector3df x43(p - c);
-	core::vector3df U(b - a);
-	core::vector3df V(c - a);
-	core::vector3df n(U.crossProduct(V));
-	n.normalize();
-	if ( abs(x43.dotProduct(n)) >= 1E-3f ) return false;
+	core::vector3df n = computeNormalTriangle(p, a, b, c);
+	if ( abs(x43.dotProduct(n)) >= H ) return false;
 
-	// Compute barycentric coordinates
-	core::vector3df v0(b - a);
-	core::vector3df v1(c - a);
-	core::vector3df v2(p - a);
-	float dot00 = v0.dotProduct(v0);
-	float dot01 = v0.dotProduct(v1);
-	float dot11 = v1.dotProduct(v1);
-	float dot20 = v2.dotProduct(v0);
-	float dot21 = v2.dotProduct(v1);
-	float denom = dot00 * dot11 - dot01 * dot01;
-	float u = (dot11 * dot20 - dot01 * dot21) * denom;
-	float v = (dot00 * dot21 - dot01 * dot20) * denom;
-	float w = 1.0f - u - v;
+	float u, v, w;
+	computeBarycentricCoords(p, a, b, c, u, v, w);
 
 	// Check if point is in triangle
-	float eps = 1E-6f;
-	return (u >= 0.0f - eps) && (v >= 0.0f - eps) && (u + v <= 1.0f + eps);
+	return (v >= 0.0f - DELTA) && (w >= 0.0f - DELTA) && (v + w <= 1.0f + DELTA);
 }
 
 /*
@@ -258,15 +257,14 @@ bool CollisionsHandler::testPointTriangle(core::vector3df & p, core::vector3df& 
 
 	From: Paul Bourke (http://paulbourke.net/geometry/pointlineplane/)
 */
-bool CollisionsHandler::testEdgeEdge(core::vector3df & p1, core::vector3df & p2, core::vector3df & p3, core::vector3df & p4)
+bool CollisionsHandler::testEdgeEdge(core::vector3df& p1, core::vector3df& p2, core::vector3df& p3, core::vector3df& p4, core::vector3df& pa, core::vector3df& pb)
 {
-	const float EPS = 1E-6f;
 	core::vector3df p13(p1 - p3);
 	core::vector3df p43(p4 - p3);
 	core::vector3df p21(p2 - p1);
-	if (abs(p43.X) < EPS && abs(p43.Y) < EPS && abs(p43.Z) < EPS)
+	if (abs(p43.X) < H && abs(p43.Y) < H && abs(p43.Z) < H)
 		return false;
-	if (abs(p21.X) < EPS && abs(p21.Y) < EPS && abs(p21.Z) < EPS)
+	if (abs(p21.X) < H && abs(p21.Y) < H && abs(p21.Z) < H)
 		return false;
 
 	float d1343 = p13.dotProduct(p43);
@@ -276,16 +274,16 @@ bool CollisionsHandler::testEdgeEdge(core::vector3df & p1, core::vector3df & p2,
 	float d2121 = p21.dotProduct(p21);
 
 	float denom = d2121 * d4343 - d4321 * d4321;
-	if (abs(denom) < EPS)
+	if (abs(denom) < H)
 		return false;
 	float numer = d1343 * d4321 - d1321 * d4343;
 
 	float mua = numer / denom;
-	float mub = (d1343 + d4321 * (mua)) / d4343;
+	float mub = (d1343 + d4321 * mua) / d4343;
 
-	core::vector3df pa = p1 + mua * p21;
-	core::vector3df pb = p3 + mub * p43;
+	pa = p1 + mua * p21;
+	pb = p3 + mub * p43;
 
 	float d = pa.getDistanceFrom(pb);
-	return d < EPS;
+	return d < H;
 }
