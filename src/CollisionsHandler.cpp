@@ -22,7 +22,7 @@ CollisionsHandler::~CollisionsHandler()
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
 	applyRepulsionsForces(sim, dt);
-	resolveCollisions(sim, dt);
+	//resolveCollisions(sim, dt);
 }
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
@@ -62,77 +62,44 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 void CollisionsHandler::applyRepulsion_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, float dt)
 {
 	if (testPointTriangle(p->p, pA->p, pB->p, pC->p)) {
-		//apply repulsion force
 
 		float w1, w2, w3;
 		computeBarycentricCoords(p->p, pA->p, pB->p, pC->p, w1, w2, w3); // todo: computed 2 times
 		core::vector3df N = computeNormalTriangle(p->p, pA->p, pB->p, pC->p); // todo: computed 2 times
+		core::vector3df T = computeTangent(N);
 		float d = H - (p->p - w1*pA->p - w2*pB->p - w3*pC->p).dotProduct(N);
 		if (d < 0.0f) return; //outside
 
-		/*core::vector3df Vr(0, 0, 0);
-		float Vrn
-
+		float Vrn, Vrt;
+		computeRelVel_PointTriangle(p, pA, pB, pC, w1, w2, w3, N, T, Vrn, Vrt);
 		if (Vrn >= 0.1*d/dt) {
-		return; //things are going to sort themselves out
-		}*/
+			return; //things are going to sort themselves out
+		}
 
-		core::vector3df Vr(p->v - w1*pA->v - w2*pB->v - w3*pC->v);
-		float Vrn = Vr.dotProduct(N);
-
-		float k = 150.0f; //todo: LOL
-		float I = p->pinned ? -dt*k*d : -fmin(dt*k*d, p->mass*(0.1f*d / dt - Vrn));
-
-		float J = (2 * I) / (1 + w1*w1 + w2*w2 + w3*w3);
-		pA->v += w1*(J / pA->mass)*N;
-		pB->v += w2*(J / pB->mass)*N;
-		pC->v += w3*(J / pC->mass)*N;
-		p->v -= (J / p->mass)*N;
-
-		/*p->pinned = true;
-		pA->pinned = true;
-		pB->pinned = true;
-		pC->pinned = true;*/
+		float I = computeRepulsionImpulse(p, Vrn, d, dt);
+		applyImpulsion_PointTriangle(p, pA, pB, pC, N, w1, w2, w3, I);
 	}
 }
 
 void CollisionsHandler::applyRepulsion_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float dt)
 {
-	core::vector3df N;
 	float a, b;
+	core::vector3df N;
 	if (testEdgeEdge(p1->p, p2->p, p3->p, p4->p, a, b, N)) {
-		//apply repulsion force
-
+		
 		N = computeNormalEdges(p1->p, p2->p, p3->p, p4->p);
-
+		core::vector3df T = computeTangent(N);
 		float d = H - ((1 - a)*p1->p + a*p2->p - (1 - b)*p3->p - b*p4->p).dotProduct(N);
 		if (d < 0.0f) return; //outside
 
-		/*core::vector3df Vr(0, 0, 0);
-		float Vrn
+		float Vrn, Vrt;
+		computeRelVel_EdgeEdge(p1, p2, p3, p4, a, b, N, T, Vrn, Vrt);
+		if (Vrn >= 0.1*d / dt) {
+			return; //things are going to sort themselves out
+		}
 
-		if (Vrn >= 0.1*d/dt) {
-		return; //things are going to sort themselves out
-		}*/
-
-		core::vector3df Vr((1 - a)*p1->v + a*p2->v - (1 - b)*p3->v - b*p4->v);
-		float Vrn = Vr.dotProduct(N);
-
-		float k = 150.0f; //todo: LOL
-		float I = p1->pinned ? -dt*k*d : -fmin(dt*k*d, p1->mass*(0.1f*d / dt - Vrn));
-		float J = (2 * I) / (a*a + (1 - b)*(1 - a) + b*b + (1 - b)*(1 - b));
-
-		p1->v += (1 - a)*(J / p1->mass)*N;
-		p2->v += a*(J / p2->mass)*N;
-		p3->v -= (1 - b)*(J / p3->mass)*N;
-		p4->v -= b*(J / p4->mass)*N;
-
-		/*
-		p1->pinned = true;
-		p2->pinned = true;
-		p3->pinned = true;
-		p4->pinned = true;
-		*/
+		float I = computeRepulsionImpulse(p1, Vrn, d, dt);
+		applyImpulsion_EdgeEdge(p1, p2, p3, p4, N, a, b, I);
 	}
 }
 
@@ -184,17 +151,14 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 	// find t*
 	float t = solveCollisionTime(pA, pB, pC, p, dt);
 	if (t < 0) return true;
-
 	if (t != 0) {
 		volatile int t = 0;
 		t++;
 	}
 
-	// get p to t*
-	core::vector3df pNew(p->p + p->v*t);
-	core::vector3df pANew(pA->p + pA->v*t);
-	core::vector3df pBNew(pB->p + pB->v*t);
-	core::vector3df pCNew(pC->p + pC->v*t);
+	// set p to t*
+	core::vector3df pNew, pANew, pBNew, pCNew;
+	computeNewPos(p, pA, pB, pC, t, pNew, pANew, pBNew, pCNew);
 
 	if (testPointTriangle(pNew, pANew, pBNew, pCNew)) {
 		//apply repulsion force
@@ -212,20 +176,17 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 	// find t*
 	float t = solveCollisionTime(p1, p2, p3, p4, dt);
 	if (t < 0) return true;
-
 	if (t != 0) {
 		volatile int t = 0;
 		t++;
 	}
 
 	// set p to t*
-	core::vector3df p1New(p1->p + p1->v*t);
-	core::vector3df p2New(p2->p + p2->v*t);
-	core::vector3df p3New(p3->p + p3->v*t);
-	core::vector3df p4New(p4->p + p4->v*t);
+	core::vector3df p1New, p2New, p3New, p4New;
+	computeNewPos(p1, p2, p3, p4, t, p1New, p2New, p3New, p4New);
 
-	core::vector3df N;
 	float a, b;
+	core::vector3df N;
 	if (testEdgeEdge(p1New, p2New, p3New, p4New, a, b, N)) {
 		//apply repulsion force
 		p1->pinned = true;
@@ -235,6 +196,96 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 	}
 
 	return false;
+}
+
+void CollisionsHandler::applyImpulsion_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, core::vector3df& N, float w1, float w2, float w3, float I)
+{
+	float J = (2 * I) / (1 + w1*w1 + w2*w2 + w3*w3);
+	if (!p->pinned) {
+		p->v -= (J / p->mass)*N;
+	}
+	if (!pA->pinned) {
+		pA->v += w1*(J / pA->mass)*N;
+	}
+	if (!pB->pinned) {
+		pB->v += w2*(J / pB->mass)*N;
+	}
+	if (!pC->pinned) {
+		pC->v += w3*(J / pC->mass)*N;
+	}
+	/*
+	p->pinned = true;
+	pA->pinned = true;
+	pB->pinned = true;
+	pC->pinned = true;
+	*/
+}
+
+void CollisionsHandler::applyImpulsion_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, core::vector3df& N, float a, float b, float I)
+{
+	float J = (2 * I) / (a*a + (1 - a)*(1 - a) + b*b + (1 - b)*(1 - b));
+	if (!p1->pinned) {
+		p1->v += (1 - a)*(J / p1->mass)*N;
+	}
+	if (!p2->pinned) {
+		p2->v += a*(J / p2->mass)*N;
+	}
+	if (!p3->pinned) {
+		p3->v -= (1 - b)*(J / p3->mass)*N;
+	}
+	if (!p4->pinned) {
+		p4->v -= b*(J / p4->mass)*N;
+	}
+	/*
+	p->pinned = true;
+	pA->pinned = true;
+	pB->pinned = true;
+	pC->pinned = true;
+	*/
+}
+
+float CollisionsHandler::computeRepulsionImpulse(Particle* p, float Vrn, float d, float dt)
+{
+	float k = 150.0f; //todo: LOL
+	float I = p->pinned ? -dt*k*d : -fmin(dt*k*d, p->mass*(0.1f*d / dt - Vrn));
+	return I;
+}
+
+void CollisionsHandler::computeRelVel_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, float w1, float w2, float w3, core::vector3df& N, core::vector3df& T,
+                                                    float& Vrn, float& Vrt)
+{
+	core::vector3df Vr(p->v - w1*pA->v - w2*pB->v - w3*pC->v);
+	Vrn = Vr.dotProduct(N);
+	Vrt = Vr.dotProduct(T);
+}
+
+void CollisionsHandler::computeRelVel_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float a, float b, core::vector3df& N, core::vector3df& T,
+                                               float& Vrn, float& Vrt)
+{
+	core::vector3df Vr((1 - a)*p1->v + a*p2->v - (1 - b)*p3->v - b*p4->v);
+	Vrn = Vr.dotProduct(N);
+	Vrt = Vr.dotProduct(T);
+}
+
+core::vector3df CollisionsHandler::computeTangent(core::vector3df& N)
+{
+	core::vector3df U1(N.crossProduct(core::vector3df(0.0f, 0.0f, 1.0f)));
+	core::vector3df U2(N.crossProduct(core::vector3df(0.0f, 1.0f, 0.0f)));
+	if (U1.getLengthSQ() > U2.getLengthSQ()) {
+		return U1.normalize();
+	}
+	else {
+		return U2.normalize();
+	}
+}
+
+void CollisionsHandler::computeNewPos(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float t,
+                                      core::vector3df& newP1, core::vector3df& newP2, core::vector3df& newP3, core::vector3df& newP4)
+{
+	newP1 = p1->p + p1->v*t;
+	newP2 = p2->p + p2->v*t;
+	newP3 = p3->p + p3->v*t;
+	newP4 = p4->p + p4->v*t;
 }
 
 float CollisionsHandler::solveCollisionTime(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float dt)
