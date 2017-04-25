@@ -85,9 +85,9 @@ void ClothSimulator::addCloth(Cloth* cloth)
 	//2 triangles per quad, 3 pts per triangle
 	int width = cloth->getWidth();
 	int height = cloth->getHeight();
-	float nVertices = p.size();
+	int nVertices = p.size();
 	int nTriangles = 2 * ((width - 1)*(height - 1));
-	float nIndices = 3 * nTriangles;
+	int nIndices = 3 * nTriangles;
 	for (int y = 0; y < height - 1; ++y) {
 		for (int x = 0; x < width - 1; ++x) {
 			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x, y)]);
