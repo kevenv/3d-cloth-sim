@@ -21,7 +21,7 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	//applyRepulsionsForces(sim, dt);
+	applyRepulsionsForces(sim, dt);
 	resolveCollisions(sim, dt);
 }
 
@@ -257,10 +257,10 @@ void CollisionsHandler::applyImpulsion_EdgeEdge(Particle* p1, Particle* p2, Part
 		p4->v -= b*(J / p4->mass)*N;
 	}
 	/*
-	p->pinned = true;
-	pA->pinned = true;
-	pB->pinned = true;
-	pC->pinned = true;
+	p1->pinned = true;
+	p2->pinned = true;
+	p3->pinned = true;
+	p4->pinned = true;
 	*/
 }
 
