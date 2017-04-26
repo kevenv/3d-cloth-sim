@@ -37,6 +37,7 @@ void ClothSimulator::update()
 		// viscous drag
 		p.addForce( -kd * p.v );
 
+		// wind
 		p.addForce(core::vector3df(-2.0f,0.0f,-2.0f));
 	}
 
