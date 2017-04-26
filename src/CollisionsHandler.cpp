@@ -175,7 +175,7 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 			return true; //things are going to sort themselves out
 		}
 
-		float I = 0.0f;//todo:
+		float I = computeImpulse_PointTriangle(p, pA, pB, pC, w1, w2, w3, Vrn);
 		applyImpulsion_PointTriangle(p, pA, pB, pC, N, w1, w2, w3, I);
 	}
 
@@ -211,7 +211,7 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 			return true; //things are going to sort themselves out
 		}
 
-		float I = 0.0f;//todo:
+		float I = computeImpulse_EdgeEdge(p1, p2, p3, p4, a, b, Vrn);
 		applyImpulsion_EdgeEdge(p1, p2, p3, p4, N, a, b, I);
 	}
 
@@ -268,6 +268,26 @@ float CollisionsHandler::computeRepulsionImpulse(Particle* p, float Vrn, float d
 {
 	float k = 150.0f; //todo: LOL
 	float I = p->pinned ? -dt*k*d : -fmin(dt*k*d, p->mass*(0.1f*d / dt - Vrn));
+	return I;
+}
+
+float CollisionsHandler::computeImpulse_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float a, float b, float Vrn)
+{
+	float iP1 = p1->pinned ? 0.0f : ((1 - a)*(1 - a)) / p1->mass;
+	float iP2 = p2->pinned ? 0.0f : (a*a) / p2->mass;
+	float iP3 = p3->pinned ? 0.0f : ((1 - b)*(1 - b)) / p3->mass;
+	float iP4 = p4->pinned ? 0.0f : (b*b) / p4->mass;
+	float I = -(1 + RESTITUTION) / (iP1 + iP2 + iP3 + iP4) * Vrn;
+	return I;
+}
+
+float CollisionsHandler::computeImpulse_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, float w1, float w2, float w3, float Vrn)
+{
+	float iP = p->pinned ? 0.0f : 1.0f / p->mass;
+	float iPA = pA->pinned ? 0.0f : (w1*w1) / pA->mass;
+	float iPB = pB->pinned ? 0.0f : (w2*w2) / pB->mass;
+	float iPC = pC->pinned ? 0.0f : (w3*w3) / pC->mass;
+	float I = -(1 + RESTITUTION) / (iP + iPA + iPB + iPC) * Vrn;
 	return I;
 }
 

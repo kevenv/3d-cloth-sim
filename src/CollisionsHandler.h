@@ -18,6 +18,7 @@ public:
 	const float H = 1E-3f;
 	const float DELTA = 1E-6f; // H / (characteristic length of the triangle = longuest side)
 	const int N_ITERATIONS = 1;
+	const float RESTITUTION = 0.0f;
 
 private:
 	void applyRepulsionsForces(ClothSimulator& clothSim, float dt);
@@ -30,6 +31,8 @@ private:
 	void applyImpulsion_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, core::vector3df& N, float w1, float w2, float w3, float I);
 	void applyImpulsion_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, core::vector3df& N, float a, float b, float I);
 	float computeRepulsionImpulse(Particle* p, float Vrn, float d, float dt);
+	float computeImpulse_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float a, float b, float Vrn);
+	float computeImpulse_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, float w1, float w2, float w3, float Vrn);
 	void computeRelVel_PointTriangle(Particle* p, Particle* pA, Particle* pB, Particle* pC, float w1, float w2, float w3, core::vector3df& N, core::vector3df& T, 
                                      float& Vrn, float& Vrt);
 	void computeRelVel_EdgeEdge(Particle* p1, Particle* p2, Particle* p3, Particle* p4, float a, float b, core::vector3df& N, core::vector3df& T,
