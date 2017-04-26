@@ -62,8 +62,12 @@ void ClothSceneNode::updateVertices(scene::SMeshBuffer* buffer)
 
 		video::S3DVertex& v = buffer->Vertices[i];
 		v.Pos.set(p.p.X, p.p.Y, p.p.Z);
-		v.Color = video::SColor(255, 0, 0, 255);
-		//v.TCoords.set();
+		if (p.pinned) {
+			v.Color = video::SColor(255, 255, 0, 0);
+		}
+		else {
+			v.Color = video::SColor(255, 0, 0, 255);
+		}
 	}
 }
 
