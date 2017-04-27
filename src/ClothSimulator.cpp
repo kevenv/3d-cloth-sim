@@ -29,6 +29,13 @@ void ClothSimulator::close()
 	for (int i = 0; i < m_TestSprings.size(); ++i) {
 		delete m_TestSprings[i];
 	}
+
+	for (int i = 0; i < m_ObjectParticles.size(); ++i) {
+		delete m_ObjectParticles[i];
+	}
+	for (int i = 0; i < m_ObjectSprings.size(); ++i) {
+		delete m_ObjectSprings[i];
+	}
 }
 
 void ClothSimulator::update()
@@ -109,6 +116,54 @@ void ClothSimulator::addCloth(Cloth* cloth)
 			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y)]);
 			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y + 1)]);
 		}
+	}
+}
+
+void ClothSimulator::addObject(scene::IMesh* mesh)
+{
+	scene::SMeshBuffer* buffer = static_cast<scene::SMeshBuffer*>(mesh->getMeshBuffer(0));
+	int nVertices = buffer->getVertexCount();
+	int nIndices = buffer->getIndexCount();
+
+	// create Particles (pinned)
+	for (int i = 0; i < nVertices; ++i) {
+		video::S3DVertex& v = buffer->Vertices[i];
+		Particle* p = new Particle(v.Pos.X, v.Pos.Y, v.Pos.Z, 0.0f, 0.0f, 0.0f);
+		p->pinned = true;
+		m_ObjectParticles.push_back(p);
+		m_Particles.push_back(p);
+	}
+
+	// create triangles list
+	// create edges list
+	for (int i = 0; i < nIndices; i+=3) {
+		int idxA = buffer->Indices[i + 0];
+		int idxB = buffer->Indices[i + 1];
+		int idxC = buffer->Indices[i + 2];
+		Particle* p1 = m_ObjectParticles[idxA];
+		Particle* p2 = m_ObjectParticles[idxB];
+		Particle* p3 = m_ObjectParticles[idxC];
+
+		// create triangles list
+		m_TriangleParticles.push_back(p1);
+		m_TriangleParticles.push_back(p2);
+		m_TriangleParticles.push_back(p3);
+
+		// create Springs
+		Spring* s1 = new Spring(p1, p2, 1.0f, 1.0f, true);
+		Spring* s2 = new Spring(p2, p3, 1.0f, 1.0f, true);
+		Spring* s3 = new Spring(p3, p1, 1.0f, 1.0f, true);
+		m_ObjectSprings.push_back(s1);
+		m_ObjectSprings.push_back(s2);
+		m_ObjectSprings.push_back(s3);
+		m_Springs.push_back(s1);
+		m_Springs.push_back(s2);
+		m_Springs.push_back(s3);
+
+		// create edges list
+		m_Edges.push_back(s1);
+		m_Edges.push_back(s2);
+		m_Edges.push_back(s3);
 	}
 }
 

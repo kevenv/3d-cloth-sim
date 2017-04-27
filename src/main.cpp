@@ -149,6 +149,15 @@ int main()
 	floorNode->setMaterialType(video::EMT_SOLID);
 	floorNode->setMaterialFlag(video::EMF_LIGHTING, false);
 
+	// sphere
+	scene::IMesh* sphereMesh = smgr->getGeometryCreator()->createSphereMesh(150.0f, 8, 8);
+	scene::IMeshSceneNode* sphereNode = smgr->addMeshSceneNode(sphereMesh, 0, -1, core::vector3df(0, 0, 0));
+	sphereNode->setPosition(core::vector3df(0, 0, 0));
+	sphereNode->setMaterialType(video::EMT_SOLID);
+	sphereNode->setMaterialFlag(video::EMF_LIGHTING, false);
+	smgr->getMeshManipulator()->setVertexColors(sphereMesh, video::SColor(255, 163, 73, 164));
+	smgr->getMeshManipulator()->recalculateNormals(sphereMesh, true, false);
+
 	// create skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
 	scene::ISceneNode* skydome=smgr->addSkyDomeSceneNode(driver->getTexture("../irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
@@ -176,6 +185,7 @@ int main()
 	// Cloth
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
+	clothSimulator.addObject(sphereMesh);
 	TestSystems test;
 	test.load(&clothSimulator, camera);
 	TestSystemRenderer testRenderer(smgr);
@@ -301,6 +311,7 @@ int main()
 	testRenderer.close();
 	axisNode->drop();
 	floorMesh->drop();
+	sphereMesh->drop();
 	device->drop();
 	
 	return 0;

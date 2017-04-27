@@ -2,6 +2,8 @@
 #define CLOTH_SIMULATOR_H
 
 #include <vector>
+#include <irrlicht.h>
+using namespace irr;
 #include "CollisionsHandler.h"
 
 class Particle;
@@ -19,6 +21,7 @@ public:
 	void update();
 
 	void addCloth(Cloth* cloth);
+	void addObject(scene::IMesh* mesh);
 	void addTestParticle(Particle* particle);
 	void addTestSpring(Spring* spring);
 	void addTestTriangle(Particle* pA, Particle* pB, Particle* pC);
@@ -39,6 +42,9 @@ private:
 
 	std::vector<Particle*> m_TestParticles;
 	std::vector<Spring*> m_TestSprings;
+
+	std::vector<Particle*> m_ObjectParticles;
+	std::vector<Spring*> m_ObjectSprings;
 
 	CollisionsHandler m_CollisionsHandler;
 };
