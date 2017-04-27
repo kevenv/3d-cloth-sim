@@ -30,9 +30,11 @@ public:
 		SMouseState() : LeftButtonDown(false), Moved(false) { }
 	} MouseState;
 
-	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera) :
+	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode) :
 		device(device),
-		camera(camera)
+		camera(camera),
+		lightNode(lightNode),
+		axisNode(axisNode)
 	{
 
 	}
@@ -88,6 +90,12 @@ public:
 				std::cout << "tgt= " << tgt.X << "," << tgt.Y << "," << tgt.Z << std::endl;
 			}
 			break;
+			case irr::KEY_KEY_L:
+				lightNode->setVisible(!lightNode->isVisible());
+				break;
+			case irr::KEY_KEY_A:
+				axisNode->setVisible(!axisNode->isVisible());
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -102,6 +110,8 @@ public:
 private:
 	IrrlichtDevice* device;
 	scene::ICameraSceneNode* camera;
+	scene::IMeshSceneNode* lightNode;
+	scene::COrientationAxisSceneNode* axisNode;
 };
 
 void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
@@ -191,7 +201,7 @@ int main()
 	//testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangles());
 	{
 		Cloth* cloth = new Cloth();
-		cloth->setPosition(core::vector3df(-50, 200, 0));
+		cloth->setPosition(core::vector3df(-50, 200, 20));
 		cloth->setRotation(core::vector3df(0, 0, 0));
 		cloth->generate(8, 9, 2.5f);
 		//cloth->pinUpCorners();
@@ -211,7 +221,7 @@ int main()
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
-	MyEventReceiver receiver(device, camera);
+	MyEventReceiver receiver(device, camera, lightNode, axisNode);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking
