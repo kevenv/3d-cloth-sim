@@ -21,7 +21,7 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	applyRepulsionsForces(sim, dt);
+	//applyRepulsionsForces(sim, dt);
 	resolveCollisions(sim, dt);
 }
 
@@ -151,10 +151,6 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 	// find t*
 	float t = solveCollisionTime(pA, pB, pC, p, dt);
 	if (t < 0) return true;
-	if (t != 0) {
-		volatile int t = 0;
-		t++;
-	}
 
 	// set p to t*
 	core::vector3df pNew, pANew, pBNew, pCNew;
@@ -170,10 +166,15 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 		if (d < 0.0f) return true; //outside
 
 		float Vrn, Vrt;
-		computeRelVel_PointTriangle(p, pA, pB, pC, w1, w2, w3, N, T, Vrn, Vrt);
+		//computeRelVel_PointTriangle(p, pA, pB, pC, w1, w2, w3, N, T, Vrn, Vrt);
+		core::vector3df Vr((pNew - p->v) - w1*(pANew - pA->v) - w2*(pBNew - pB->v) - w3*(pCNew - pC->v));
+		Vrn = Vr.dotProduct(N);
+		Vrt = Vr.dotProduct(T);
+		/*
 		if (Vrn >= 0.1*d / dt) {
 			return true; //things are going to sort themselves out
 		}
+		*/
 
 		float I = computeImpulse_PointTriangle(p, pA, pB, pC, w1, w2, w3, Vrn);
 		applyImpulsion_PointTriangle(p, pA, pB, pC, N, w1, w2, w3, I);
@@ -187,10 +188,6 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 	// find t*
 	float t = solveCollisionTime(p1, p2, p3, p4, dt);
 	if (t < 0) return true;
-	if (t != 0) {
-		volatile int t = 0;
-		t++;
-	}
 
 	// set p to t*
 	core::vector3df p1New, p2New, p3New, p4New;
@@ -207,9 +204,16 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 
 		float Vrn, Vrt;
 		computeRelVel_EdgeEdge(p1, p2, p3, p4, a, b, N, T, Vrn, Vrt);
+		/*
+		core::vector3df Vr((1 - a)*(p1New-p1->v) + a*(p2New-p2->v) - (1 - b)*(p3New-p3->v) - b*(p4New-p4->v));
+		Vrn = Vr.dotProduct(N);
+		Vrt = Vr.dotProduct(T);
+		*/
+		/*
 		if (Vrn >= 0.1*d / dt) {
 			return true; //things are going to sort themselves out
 		}
+		*/
 
 		float I = computeImpulse_EdgeEdge(p1, p2, p3, p4, a, b, Vrn);
 		applyImpulsion_EdgeEdge(p1, p2, p3, p4, N, a, b, I);
@@ -355,7 +359,10 @@ float CollisionsHandler::solveCollisionTime(Particle* p1, Particle* p2, Particle
 	
 	// get smallest t
 	bool validRoot = false;
-	float rootsGood[3] = { 1E16f };
+	float rootsGood[3];
+	rootsGood[0] = 1E16f;
+	rootsGood[1] = 1E16f;
+	rootsGood[2] = 1E16f;
 	for (int i = 0; i < nRoots; ++i) { //todo: unroll
 		if (roots[i] >= 0 && roots[i] <= dt) {
 			rootsGood[i] = roots[i];

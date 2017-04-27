@@ -15,7 +15,7 @@ public:
 
 	void handleCollisions(ClothSimulator& clothSim, float dt);
 
-	const float H = 1E-3f;
+	const float H = 1E-2f;
 	const float DELTA = 1E-6f; // H / (characteristic length of the triangle = longuest side)
 	const int N_ITERATIONS = 1;
 	const float RESTITUTION = 0.0f;
