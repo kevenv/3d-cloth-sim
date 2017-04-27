@@ -30,8 +30,9 @@ public:
 		SMouseState() : LeftButtonDown(false), Moved(false) { }
 	} MouseState;
 
-	MyEventReceiver(IrrlichtDevice* device) :
-		device(device)
+	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera) :
+		device(device),
+		camera(camera)
 	{
 
 	}
@@ -79,6 +80,14 @@ public:
 		{
 			switch (event.KeyInput.Key)
 			{
+			case irr::KEY_KEY_C:
+			{
+				const core::vector3df pos = camera->getPosition();
+				const core::vector3df tgt = camera->getTarget();
+				std::cout << "pos= " << pos.X << "," << pos.Y << "," << pos.Z << std::endl;
+				std::cout << "tgt= " << tgt.X << "," << tgt.Y << "," << tgt.Z << std::endl;
+			}
+			break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -92,6 +101,7 @@ public:
 
 private:
 	IrrlichtDevice* device;
+	scene::ICameraSceneNode* camera;
 };
 
 int main()
@@ -167,9 +177,9 @@ int main()
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
 	TestSystems test;
-	test.load(&clothSimulator);
+	test.load(&clothSimulator, camera);
 	TestSystemRenderer testRenderer(smgr);
-	testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings());
+	testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangleParticles());
 	{
 		Cloth* cloth = new Cloth();
 		cloth->setPosition(core::vector3df(-200, 100, -100));
@@ -190,7 +200,7 @@ int main()
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
-	MyEventReceiver receiver(device);
+	MyEventReceiver receiver(device, camera);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking
@@ -201,6 +211,8 @@ int main()
 	/*
 	That's it, draw everything.
 	*/
+	//camera->setPosition(core::vector3df(-299, 205, -13));
+	//camera->setTarget(core::vector3df(-72, -78, -12));
 
 	int lastFPS = -1;
 
@@ -270,11 +282,6 @@ int main()
 		env->drawAll();
 		testRenderer.render(driver);
 		driver->endScene();
-
-		/*const core::vector3df pos = camera->getPosition();
-		const core::vector3df tgt = camera->getTarget();
-		std::cout << "pos= " << pos.X << "," << pos.Y << "," << pos.Z << std::endl;
-		std::cout << "tgt= " << tgt.X << "," << tgt.Y << "," << tgt.Z << std::endl;*/
 
 		// display frames per second in window title
 		int fps = driver->getFPS();
