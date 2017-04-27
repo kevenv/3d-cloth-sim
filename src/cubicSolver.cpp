@@ -4,6 +4,7 @@
 	Finds all the roots of a Cubic using Newton-Raphson method
 */
 #include "cubicSolver.h"
+#include "cubicSolver_adsk.h"
 
 #include <math.h>
 #include <iostream>
@@ -12,12 +13,30 @@
 
 int cubic_solver(float a, float b, float c, float d, float* roots)
 {
+	// using Autodesk's Cubic Solver as mine is not working properly every time...
+	float poly[4];
+	poly[3] = a;
+	poly[2] = b;
+	poly[1] = c;
+	poly[0] = d;
+	float dt = 0.05f;
+	init_tolerance();
+	int numRoots = polyZeroes(poly, 3, 0.0-dt, 1, 1.0+dt, 1, roots);
+	numRoots = numRoots == -1 ? 0 : numRoots;
+	return numRoots;
+	/*
 	if (equals(a, 0,1E-6f)) {
 		if (equals(b, 0, 1E-6f)) {
 			if (equals(c, 0, 1E-6f)) {
-				// constant
-				roots[0] = d;
-				return 1;
+				if (equals(d, 0, 1E-6f)) {
+					// no solution exists
+					return 0;
+				}
+				else {
+					// constant
+					roots[0] = d;
+					return 1;
+				}
 			}
 			else {
 				// linear
@@ -52,6 +71,7 @@ int cubic_solver(float a, float b, float c, float d, float* roots)
 	}
 
 	return ri; //nRootsFound
+	*/
 }
 
 int cubic_bracket_roots(float a, float b, float c, float d, float intervals[3][2])
