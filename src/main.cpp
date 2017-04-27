@@ -101,6 +101,12 @@ public:
 			case irr::KEY_KEY_D:
 				cloth->pinUpCorners(false);
 				break;
+			case irr::KEY_KEY_1:
+				cloth->pinUpLCorner(false);
+				break;
+			case irr::KEY_KEY_2:
+				cloth->pinUpRCorner(false);
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;

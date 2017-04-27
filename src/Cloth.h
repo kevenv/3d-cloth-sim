@@ -25,6 +25,8 @@ public:
 	void pinDownCorners(bool pinned = true);
 	void pinAllCorners(bool pinned = true);
 	void pinAll(bool pinned = true);
+	void pinUpLCorner(bool pinned = true);
+	void pinUpRCorner(bool pinned = true);
 	inline void idx1Dto2D(int idx, int& x, int& y)
 	{
 		x = idx % m_Width;

@@ -97,8 +97,8 @@ Particle* Cloth::getParticle(int x, int y)
 
 void Cloth::pinUpCorners(bool pinned)
 {
-	Particle* p0 = getParticle(m_Width-1, m_Height-1); p0->pinned = pinned;
-	Particle* p1 = getParticle(0, m_Height-1); p1->pinned = pinned;
+	pinUpLCorner(pinned);
+	pinUpRCorner(pinned);
 }
 
 void Cloth::pinDownCorners(bool pinned)
@@ -118,4 +118,14 @@ void Cloth::pinAll(bool pinned)
 	for (auto& p : m_Particles) {
 		p.pinned = pinned;
 	}
+}
+
+void Cloth::pinUpLCorner(bool pinned)
+{
+	Particle* p0 = getParticle(m_Width - 1, m_Height - 1); p0->pinned = pinned;
+}
+
+void Cloth::pinUpRCorner(bool pinned)
+{
+	Particle* p1 = getParticle(0, m_Height - 1); p1->pinned = pinned;
 }
