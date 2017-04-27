@@ -31,13 +31,14 @@ public:
 	} MouseState;
 
 	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode,
-                    Cloth* cloth, ClothSimulator* sim) :
+                    Cloth* cloth, ClothSimulator* sim, ClothRenderer* rdr) :
 		device(device),
 		camera(camera),
 		lightNode(lightNode),
 		axisNode(axisNode),
 		cloth(cloth),
-		sim(sim)
+		sim(sim),
+		rdr(rdr)
 	{
 
 	}
@@ -114,6 +115,9 @@ public:
 			case irr::KEY_KEY_R:
 				sim->m_Reset = true;
 				break;
+			case irr::KEY_KEY_P:
+				rdr->setDrawParticles(!rdr->getDrawParticles());
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -132,6 +136,7 @@ private:
 	scene::COrientationAxisSceneNode* axisNode;
 	Cloth* cloth;
 	ClothSimulator* sim;
+	ClothRenderer* rdr;
 };
 
 void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
@@ -235,11 +240,11 @@ int main()
 		clothSimulator.addCloth(cloth);
 	}
 	*/
-	ClothRenderer clothRenderer(smgr, true /*draw particles*/);
+	ClothRenderer clothRenderer(smgr);
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
-	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth, &clothSimulator);
+	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth, &clothSimulator, &clothRenderer);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking

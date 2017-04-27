@@ -12,7 +12,7 @@ class Particle;
 class ClothRenderer
 {
 public:
-	ClothRenderer(scene::ISceneManager* smgr, bool drawParticles);
+	ClothRenderer(scene::ISceneManager* smgr);
 	~ClothRenderer();
 
 	void init(const std::vector<Cloth*>& cloths);
@@ -20,6 +20,8 @@ public:
 	void update();
 
 	Particle* getParticleFromNode(scene::ISceneNode* node);
+	void setDrawParticles(bool value);
+	inline bool getDrawParticles() const { return m_DrawParticles; }
 
 private:
 	scene::ISceneManager* m_smgr;

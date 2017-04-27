@@ -4,10 +4,10 @@
 #include "Cloth.h"
 #include "Particle.h"
 
-ClothRenderer::ClothRenderer(scene::ISceneManager* smgr, bool drawParticles):
+ClothRenderer::ClothRenderer(scene::ISceneManager* smgr):
 	m_smgr(smgr),
 	m_ParticleMesh(NULL),
-	m_DrawParticles(drawParticles)
+	m_DrawParticles(false)
 {
 
 }
@@ -19,21 +19,18 @@ ClothRenderer::~ClothRenderer()
 
 void ClothRenderer::init(const std::vector<Cloth*>& cloths)
 {
-	if (m_DrawParticles) {
-		m_ParticleMesh = m_smgr->getGeometryCreator()->createSphereMesh(5.0f);
-	}
+	m_ParticleMesh = m_smgr->getGeometryCreator()->createSphereMesh(5.0f);
 
 	for (auto* cloth : cloths) {
 		ClothSceneNode* clothNode = new ClothSceneNode(cloth, m_smgr->getRootSceneNode(), m_smgr);
 		m_ClothNodes.push_back(clothNode);
-				
-		if (m_DrawParticles) {
-			auto& particles = cloth->getParticles();
-			for (auto& p : particles) {
-				scene::IMeshSceneNode* node = createParticleNode();
-				node->setPosition(p.p);
-				m_Particles.push_back(&p);
-			}
+
+		auto& particles = cloth->getParticles();
+		for (auto& p : particles) {
+			scene::IMeshSceneNode* node = createParticleNode();
+			node->setPosition(p.p);
+			node->setVisible(m_DrawParticles);
+			m_Particles.push_back(&p);
 		}
 	}
 }
@@ -43,10 +40,8 @@ void ClothRenderer::close()
 	for (auto* n : m_ClothNodes) {
 		n->drop(); //delete
 	}
-
-	if (m_DrawParticles) {
-		m_ParticleMesh->drop();
-	}
+	
+	m_ParticleMesh->drop();
 }
 
 void ClothRenderer::update()
@@ -87,4 +82,14 @@ Particle* ClothRenderer::getParticleFromNode(scene::ISceneNode* node)
 	}
 
 	return nullptr;
+}
+
+void ClothRenderer::setDrawParticles(bool value)
+{
+	if (value != m_DrawParticles) {
+		m_DrawParticles = value;
+		for (auto* p : m_ParticleNodes) {
+			p->setVisible(m_DrawParticles);
+		}
+	}
 }
