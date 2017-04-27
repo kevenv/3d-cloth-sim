@@ -7,7 +7,8 @@
 ClothRenderer::ClothRenderer(scene::ISceneManager* smgr):
 	m_smgr(smgr),
 	m_ParticleMesh(NULL),
-	m_DrawParticles(false)
+	m_DrawParticles(false),
+	m_WireframeMode(false)
 {
 
 }
@@ -92,6 +93,16 @@ void ClothRenderer::setDrawParticles(bool value)
 		m_DrawParticles = value;
 		for (auto* p : m_ParticleNodes) {
 			p->setVisible(m_DrawParticles);
+		}
+	}
+}
+
+void ClothRenderer::setWireframeMode(bool value)
+{
+	if (value != m_WireframeMode) {
+		m_WireframeMode = value;
+		for (auto* c : m_ClothNodes) {
+			c->setWireframeMode(value);
 		}
 	}
 }

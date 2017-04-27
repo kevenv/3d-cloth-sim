@@ -16,6 +16,8 @@ public:
 
 	virtual void OnRegisterSceneNode();
 	virtual void render();
+	inline void setWireframeMode(bool value) { m_material.Wireframe = value; }
+	inline bool getWireframeMode() const { return m_material.Wireframe; }
 
 	virtual const core::aabbox3d<f32>& getBoundingBox() const { return m_box; }
 	virtual u32 getMaterialCount() const { return 1; }
