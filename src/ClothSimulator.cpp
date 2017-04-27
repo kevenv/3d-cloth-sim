@@ -22,6 +22,13 @@ void ClothSimulator::close()
 	for (int i = 0; i < m_Cloths.size(); ++i) {
 		delete m_Cloths[i];
 	}
+
+	for (int i = 0; i < m_TestParticles.size(); ++i) {
+		delete m_TestParticles[i];
+	}
+	for (int i = 0; i < m_TestSprings.size(); ++i) {
+		delete m_TestSprings[i];
+	}
 }
 
 void ClothSimulator::update()
@@ -100,4 +107,23 @@ void ClothSimulator::addCloth(Cloth* cloth)
 			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y + 1)]);
 		}
 	}
+}
+
+void ClothSimulator::addTestParticle(Particle* particle)
+{
+	m_TestParticles.push_back(particle);
+	m_Particles.push_back(particle);
+}
+
+void ClothSimulator::addTestSpring(Spring* spring)
+{
+	m_TestSprings.push_back(spring);
+	m_Springs.push_back(spring);
+}
+
+void ClothSimulator::addTestTriangle(Particle* pA, Particle* pB, Particle* pC)
+{
+	m_TriangleParticles.push_back(pA);
+	m_TriangleParticles.push_back(pB);
+	m_TriangleParticles.push_back(pC);
 }

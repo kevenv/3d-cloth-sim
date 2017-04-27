@@ -6,6 +6,8 @@
 #include "ClothRenderer.h"
 #include "ClothSimulator.h"
 #include "Cloth.h"
+#include "TestSystems.h"
+#include "TestSystemRenderer.h"
 
 using namespace irr;
 
@@ -164,6 +166,10 @@ int main()
 	// Cloth
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
+	TestSystems test;
+	test.load(&clothSimulator);
+	TestSystemRenderer testRenderer(smgr);
+	testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings());
 	{
 		Cloth* cloth = new Cloth();
 		cloth->setPosition(core::vector3df(-200, 100, -100));
@@ -257,10 +263,12 @@ int main()
 		
 		clothSimulator.update();
 		clothRenderer.update();
+		testRenderer.update();
 
 		driver->beginScene(true, true, 0 );
 		smgr->drawAll();
 		env->drawAll();
+		testRenderer.render(driver);
 		driver->endScene();
 
 		/*const core::vector3df pos = camera->getPosition();
@@ -283,6 +291,7 @@ int main()
 	
 	clothSimulator.close();
 	clothRenderer.close();
+	testRenderer.close();
 	axisNode->drop();
 	floorMesh->drop();
 	device->drop();
