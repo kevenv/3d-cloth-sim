@@ -2,7 +2,9 @@
 
 #include "Cloth.h"
 
-ClothSimulator::ClothSimulator()
+ClothSimulator::ClothSimulator():
+	m_CollisionsEnabled(true),
+	m_Reset(false)
 {
 
 }
@@ -43,6 +45,13 @@ void ClothSimulator::update()
 	float dt = 0.01f;
 	float kd = 0.01f;
 	float g = 9.81f;
+
+	if (m_Reset) {
+		for (auto* p : m_Particles) {
+			p->reset();
+		}
+		m_Reset = false;
+	}
 	
 	for (auto* p : m_Particles) {
 		// gravity force
@@ -50,7 +59,7 @@ void ClothSimulator::update()
 		// viscous drag
 		p->addForce( -kd * p->v );
 		// wind
-		p->addForce(core::vector3df(-2.0f,0.0f,-2.0f));
+		p->addForce(core::vector3df(2.0f,0.0f,2.0f));
 	}
 
 	// spring forces
@@ -70,7 +79,9 @@ void ClothSimulator::update()
 	}
 
 	// collision responses
-	m_CollisionsHandler.handleCollisions(*this, dt);
+	if (m_CollisionsEnabled) {
+		m_CollisionsHandler.handleCollisions(*this, dt);
+	}
 
 	// update positions (symplectic euler)
 	for (auto* p : m_Particles) {

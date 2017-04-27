@@ -33,7 +33,10 @@ public:
 	inline const std::vector<Particle*>& getPoints() const { return m_Points; }
 	inline const std::vector<Particle*>& getTriangles() const { return m_Triangles; }
 	inline const std::vector<Spring*>& getEdges() const { return m_Edges; }
-	
+
+	bool m_CollisionsEnabled;
+	bool m_Reset;
+
 private:
 	// for particles system simulation
 	std::vector<Particle*> m_Particles;

@@ -31,12 +31,13 @@ public:
 	} MouseState;
 
 	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode,
-                    Cloth* cloth) :
+                    Cloth* cloth, ClothSimulator* sim) :
 		device(device),
 		camera(camera),
 		lightNode(lightNode),
 		axisNode(axisNode),
-		cloth(cloth)
+		cloth(cloth),
+		sim(sim)
 	{
 
 	}
@@ -107,6 +108,12 @@ public:
 			case irr::KEY_KEY_2:
 				cloth->pinUpRCorner(false);
 				break;
+			case irr::KEY_KEY_K:
+				sim->m_CollisionsEnabled = !sim->m_CollisionsEnabled;
+				break;
+			case irr::KEY_KEY_R:
+				sim->m_Reset = true;
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -124,6 +131,7 @@ private:
 	scene::IMeshSceneNode* lightNode;
 	scene::COrientationAxisSceneNode* axisNode;
 	Cloth* cloth;
+	ClothSimulator* sim;
 };
 
 void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
@@ -231,7 +239,7 @@ int main()
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
-	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth);
+	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth, &clothSimulator);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking
