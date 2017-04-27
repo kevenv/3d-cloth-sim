@@ -134,8 +134,8 @@ int main()
 	// add camera
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS(0, 100.0f, 1.2f);
 	//scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeMaya(0, 100.0f, 1.2f);
-	camera->setPosition(core::vector3df(0,750,-879));
-	camera->setTarget(core::vector3df(13, 105, 80));
+	camera->setPosition(core::vector3df(44,391,459));
+	camera->setTarget(core::vector3df(38, 107, -75));
 	camera->setFarValue(42000.0f);
 
 	// disable mouse cursor
@@ -171,19 +171,15 @@ int main()
 	axisNode->setPosition(core::vector3df(0,50,0));
 	
 	// light
-	scene::ILightSceneNode *node = smgr->addLightSceneNode(0, core::vector3df(0, 100, 0),
-		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 500.0f);
-	if (node)
-	{
-		node->getLightData().Attenuation.set(0.f, 1.f / 500.f, 0.f);
-		scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(core::vector3df(0, 150, 0), 250.0f);
-		if (anim)
-		{
-			//node->addAnimator(anim);
-			anim->drop();
-		}
-	}
-
+	scene::ILightSceneNode *node = smgr->addLightSceneNode(0, core::vector3df(-265, 364, 264), video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 500.0f);
+	node->getLightData().Attenuation.set(0.f, 1.f / 500.f, 0.f);
+	scene::IMesh* lightMesh = smgr->getGeometryCreator()->createSphereMesh(50.0f, 4, 4);
+	scene::IMeshSceneNode* lightNode = smgr->addMeshSceneNode(lightMesh, 0, -1, node->getPosition());
+	//lightNode->setScale(core::vector3df(node->getRadius()));
+	lightNode->setMaterialType(video::EMT_SOLID);
+	lightNode->setMaterialFlag(video::EMF_LIGHTING, false);
+	smgr->getMeshManipulator()->setVertexColors(lightMesh, video::SColor(255, 0, 255, 0));
+	
 	// Cloth
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
@@ -195,20 +191,22 @@ int main()
 	//testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangles());
 	{
 		Cloth* cloth = new Cloth();
-		cloth->setPosition(core::vector3df(-200, 100, -100));
+		cloth->setPosition(core::vector3df(-50, 200, 0));
 		cloth->setRotation(core::vector3df(0, 0, 0));
-		cloth->generate(20, 25, 2.5f);
-		cloth->pinUpCorners();
+		cloth->generate(8, 9, 2.5f);
+		//cloth->pinUpCorners();
 		clothSimulator.addCloth(cloth);
 	}
+	/*
 	{
 		Cloth* cloth = new Cloth();
-		cloth->setPosition(core::vector3df(-200, 100, 200));
+		cloth->setPosition(core::vector3df(-200, 100, 00));
 		cloth->setRotation(core::vector3df(-90, 0, 0));
-		cloth->generate(20, 25, 2.5f);
+		cloth->generate(8, 9, 2.5f);
 		cloth->pinAll();
 		clothSimulator.addCloth(cloth);
 	}
+	*/
 	ClothRenderer clothRenderer(smgr, true /*draw particles*/);
 	clothRenderer.init(clothSimulator.getCloths());
 
@@ -260,6 +258,7 @@ int main()
 	axisNode->drop();
 	floorMesh->drop();
 	sphereMesh->drop();
+	lightMesh->drop();
 	device->drop();
 	
 	return 0;
