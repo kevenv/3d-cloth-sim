@@ -30,11 +30,13 @@ public:
 		SMouseState() : LeftButtonDown(false), Moved(false) { }
 	} MouseState;
 
-	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode) :
+	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode,
+                    Cloth* cloth) :
 		device(device),
 		camera(camera),
 		lightNode(lightNode),
-		axisNode(axisNode)
+		axisNode(axisNode),
+		cloth(cloth)
 	{
 
 	}
@@ -96,6 +98,9 @@ public:
 			case irr::KEY_KEY_A:
 				axisNode->setVisible(!axisNode->isVisible());
 				break;
+			case irr::KEY_KEY_D:
+				cloth->pinUpCorners(false);
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -112,6 +117,7 @@ private:
 	scene::ICameraSceneNode* camera;
 	scene::IMeshSceneNode* lightNode;
 	scene::COrientationAxisSceneNode* axisNode;
+	Cloth* cloth;
 };
 
 void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
@@ -199,14 +205,12 @@ int main()
 	//test.load(&clothSimulator, camera);
 	TestSystemRenderer testRenderer(smgr);
 	//testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangles());
-	{
-		Cloth* cloth = new Cloth();
-		cloth->setPosition(core::vector3df(-50, 200, 20));
-		cloth->setRotation(core::vector3df(0, 0, 0));
-		cloth->generate(8, 9, 2.5f);
-		//cloth->pinUpCorners();
-		clothSimulator.addCloth(cloth);
-	}
+	Cloth* cloth = new Cloth();
+	cloth->setPosition(core::vector3df(-50, 200, 20));
+	cloth->setRotation(core::vector3df(0, 0, 0));
+	cloth->generate(8, 9, 2.5f);
+	cloth->pinUpCorners();
+	clothSimulator.addCloth(cloth);
 	/*
 	{
 		Cloth* cloth = new Cloth();
@@ -221,7 +225,7 @@ int main()
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
-	MyEventReceiver receiver(device, camera, lightNode, axisNode);
+	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking
