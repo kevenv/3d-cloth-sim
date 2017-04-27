@@ -104,6 +104,8 @@ private:
 	scene::ICameraSceneNode* camera;
 };
 
+void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
+
 int main()
 {
 	// force OpenGL
@@ -221,68 +223,13 @@ int main()
 	/*
 	That's it, draw everything.
 	*/
-	//camera->setPosition(core::vector3df(-299, 205, -13));
-	//camera->setTarget(core::vector3df(-72, -78, -12));
 
 	int lastFPS = -1;
 
 	while(device->run())
 	if (device->isWindowActive())
 	{
-		if (receiver.MouseState.LeftButtonDown) {
-			core::line3d<f32> ray = collMan->getRayFromScreenCoordinates(device->getCursorControl()->getPosition(), camera);
-			core::vector3df intersection; // Tracks the current intersection point with the level or a mesh
-			core::triangle3df hitTriangle; // Used to show with triangle has been hit
-			scene::ISceneNode * selectedSceneNode = collMan->getSceneNodeAndCollisionPointFromRay(
-				ray,
-				intersection, // This will be the position of the collision
-				hitTriangle, // This will be the triangle hit in the collision
-				1, // This ensures that only nodes that we have
-				   // set up to be pickable are considered
-				0); // Check the entire scene (this is actually the implicit default)
-			if (!selectedParticle && selectedSceneNode)
-			{
-				selectedParticle = clothRenderer.getParticleFromNode(selectedSceneNode);
-				if (selectedParticle) {
-					camera->setInputReceiverEnabled(false);
-					clickPos = receiver.MouseState.position;
-				}
-			}
-		}
-		else {
-			selectedParticle = NULL;
-			camera->setInputReceiverEnabled(true);
-		}
-
-		if (selectedParticle && receiver.MouseState.Moved) {
-			core::vector2di dv = clickPos - receiver.MouseState.position;
-
-			core::matrix4 viewMat;
-			core::matrix4 projMat;
-
-			/*float x = (2.0f * dv.X) / 800 - 1.0f;
-			float y = 1.0f - (2.0f * dv.Y) / 600;
-			float z = -1.0f;
-			core::vector3df ray_clip(x, y, z);
-			
-			camera->getProjectionMatrix().getInverse(projMat);
-			camera->getViewMatrix().getInverse(viewMat);
-			projMat.transformVect(ray_clip);
-			ray_clip.Z = -1.0f;
-			viewMat.transformVect(ray_clip);
-			ray_clip.normalize();*/
-
-			camera->getProjectionMatrix().getInverse(projMat);
-			camera->getViewMatrix().getInverse(viewMat);
-			projMat *= viewMat;
-
-			core::vector3df v(dv.X, dv.Y, 0.0f);
-			projMat.transformVect(v);
-
-			std::cout << v.X << "," << v.Y << "," << v.Z << std::endl;
-			selectedParticle->addForce(v*2.5f);
-		}
-		
+		//update3DPicking(receiver, selectedParticle, clickPos, smgr, device, camera, clothRenderer);
 		clothSimulator.update();
 		clothRenderer.update();
 		testRenderer.update();
@@ -315,4 +262,63 @@ int main()
 	device->drop();
 	
 	return 0;
+}
+
+void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer)
+{
+	scene::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
+	
+	if (receiver.MouseState.LeftButtonDown) {
+		core::line3d<f32> ray = collMan->getRayFromScreenCoordinates(device->getCursorControl()->getPosition(), camera);
+		core::vector3df intersection; // Tracks the current intersection point with the level or a mesh
+		core::triangle3df hitTriangle; // Used to show with triangle has been hit
+		scene::ISceneNode * selectedSceneNode = collMan->getSceneNodeAndCollisionPointFromRay(
+			ray,
+			intersection, // This will be the position of the collision
+			hitTriangle, // This will be the triangle hit in the collision
+			1, // This ensures that only nodes that we have
+			   // set up to be pickable are considered
+			0); // Check the entire scene (this is actually the implicit default)
+		if (!selectedParticle && selectedSceneNode)
+		{
+			selectedParticle = clothRenderer.getParticleFromNode(selectedSceneNode);
+			if (selectedParticle) {
+				camera->setInputReceiverEnabled(false);
+				clickPos = receiver.MouseState.position;
+			}
+		}
+	}
+	else {
+		selectedParticle = NULL;
+		camera->setInputReceiverEnabled(true);
+	}
+
+	if (selectedParticle && receiver.MouseState.Moved) {
+		core::vector2di dv = clickPos - receiver.MouseState.position;
+
+		core::matrix4 viewMat;
+		core::matrix4 projMat;
+
+		/*float x = (2.0f * dv.X) / 800 - 1.0f;
+		float y = 1.0f - (2.0f * dv.Y) / 600;
+		float z = -1.0f;
+		core::vector3df ray_clip(x, y, z);
+
+		camera->getProjectionMatrix().getInverse(projMat);
+		camera->getViewMatrix().getInverse(viewMat);
+		projMat.transformVect(ray_clip);
+		ray_clip.Z = -1.0f;
+		viewMat.transformVect(ray_clip);
+		ray_clip.normalize();*/
+
+		camera->getProjectionMatrix().getInverse(projMat);
+		camera->getViewMatrix().getInverse(viewMat);
+		projMat *= viewMat;
+
+		core::vector3df v(dv.X, dv.Y, 0.0f);
+		projMat.transformVect(v);
+
+		std::cout << v.X << "," << v.Y << "," << v.Z << std::endl;
+		selectedParticle->addForce(v*2.5f);
+	}
 }
