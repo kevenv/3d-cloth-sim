@@ -27,8 +27,8 @@ void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 
 void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt)
 {
-	auto& particles = clothSim.getParticles();
-	auto& triangles = clothSim.getTriangleParticles();
+	auto& particles = clothSim.getPoints();
+	auto& triangles = clothSim.getTriangles();
 	for (auto* p : particles) {
 		for (int i = 0; i < triangles.size(); i+=3) {
 			Particle* pA = triangles[i + 0];
@@ -105,8 +105,8 @@ void CollisionsHandler::applyRepulsion_EdgeEdge(Particle* p1, Particle* p2, Part
 
 void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 {
-	auto& particles = clothSim.getParticles();
-	auto& triangles = clothSim.getTriangleParticles();
+	auto& particles = clothSim.getPoints();
+	auto& triangles = clothSim.getTriangles();
 	auto& edges = clothSim.getEdges();
 
 	bool resolved = false;

@@ -187,9 +187,9 @@ int main()
 	clothSimulator.init();
 	clothSimulator.addObject(sphereMesh);
 	TestSystems test;
-	test.load(&clothSimulator, camera);
+	//test.load(&clothSimulator, camera);
 	TestSystemRenderer testRenderer(smgr);
-	testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangleParticles());
+	//testRenderer.init(clothSimulator.getTestParticles(), clothSimulator.getTestSprings(), clothSimulator.getTriangles());
 	{
 		Cloth* cloth = new Cloth();
 		cloth->setPosition(core::vector3df(-200, 100, -100));

@@ -25,28 +25,40 @@ public:
 	void addTestParticle(Particle* particle);
 	void addTestSpring(Spring* spring);
 	void addTestTriangle(Particle* pA, Particle* pB, Particle* pC);
+
 	inline const std::vector<Cloth*>& getCloths() const { return m_Cloths; }
-	inline const std::vector<Particle*>& getParticles() const { return m_Particles; }
-	inline const std::vector<Spring*>& getSprings() const { return m_Springs; }
-	inline const std::vector<Spring*>& getEdges() const { return m_Edges; }
-	inline const std::vector<Particle*>& getTriangleParticles() const { return m_TriangleParticles; }
 	inline const std::vector<Particle*>& getTestParticles() const { return m_TestParticles; }
 	inline const std::vector<Spring*>& getTestSprings() const { return m_TestSprings; }
-
+	
+	inline const std::vector<Particle*>& getPoints() const { return m_Points; }
+	inline const std::vector<Particle*>& getTriangles() const { return m_Triangles; }
+	inline const std::vector<Spring*>& getEdges() const { return m_Edges; }
+	
 private:
-	std::vector<Cloth*> m_Cloths;
+	// for particles system simulation
 	std::vector<Particle*> m_Particles;
 	std::vector<Spring*> m_Springs;
-	std::vector<Particle*> m_TriangleParticles;
+
+	// for collision detection
+	CollisionsHandler m_CollisionsHandler;
+
+	std::vector<Particle*> m_Points;
+	std::vector<Particle*> m_Triangles;
 	std::vector<Spring*> m_Edges;
 
-	std::vector<Particle*> m_TestParticles;
-	std::vector<Spring*> m_TestSprings;
+	// objects data (Owner)
+	/*
+                    Cloth    Object    Test
+        Simulation  x                  x
+        Collisions  x        x         x
+	*/
+	std::vector<Cloth*> m_Cloths;
 
 	std::vector<Particle*> m_ObjectParticles;
 	std::vector<Spring*> m_ObjectSprings;
 
-	CollisionsHandler m_CollisionsHandler;
+	std::vector<Particle*> m_TestParticles;
+	std::vector<Spring*> m_TestSprings;
 };
 
 #endif

@@ -19,22 +19,22 @@ void ClothSimulator::init()
 
 void ClothSimulator::close()
 {
-	for (int i = 0; i < m_Cloths.size(); ++i) {
-		delete m_Cloths[i];
+	for (auto* c : m_Cloths) {
+		delete c;
 	}
 
-	for (int i = 0; i < m_TestParticles.size(); ++i) {
-		delete m_TestParticles[i];
+	for (auto* p : m_ObjectParticles) {
+		delete p;
 	}
-	for (int i = 0; i < m_TestSprings.size(); ++i) {
-		delete m_TestSprings[i];
+	for (auto* s : m_ObjectSprings) {
+		delete s;
 	}
 
-	for (int i = 0; i < m_ObjectParticles.size(); ++i) {
-		delete m_ObjectParticles[i];
+	for (auto* p : m_TestParticles) {
+		delete p;
 	}
-	for (int i = 0; i < m_ObjectSprings.size(); ++i) {
-		delete m_ObjectSprings[i];
+	for (auto* s : m_TestSprings) {
+		delete s;
 	}
 }
 
@@ -44,31 +44,28 @@ void ClothSimulator::update()
 	float kd = 0.01f;
 	float g = 9.81f;
 	
-	for (int i = 0; i < m_Particles.size(); ++i) {
-		Particle& p = *m_Particles[i];
+	for (auto* p : m_Particles) {
 		// gravity force
-		p.addForce( p.mass * core::vector3df(0.0f, -g, 0.0f) );
+		p->addForce( p->mass * core::vector3df(0.0f, -g, 0.0f) );
 		// viscous drag
-		p.addForce( -kd * p.v );
-
+		p->addForce( -kd * p->v );
 		// wind
-		p.addForce(core::vector3df(-2.0f,0.0f,-2.0f));
+		p->addForce(core::vector3df(-2.0f,0.0f,-2.0f));
 	}
 
 	// spring forces
-	for (int i = 0; i < m_Springs.size(); ++i) {
-		m_Springs[i]->apply();
+	for (auto* s : m_Springs) {
+		s->apply();
 	}
 
 	// update velocities (symplectic euler)
-	for (int i = 0; i < m_Particles.size(); ++i) {
-		Particle& p = *m_Particles[i];
-		if (p.pinned) {
-			p.f.set(0.0f, 0.0f, 0.0f);
-			p.v.set(0.0f, 0.0f, 0.0f);
+	for (auto* p : m_Particles) {
+		if (p->pinned) {
+			p->f.set(0.0f, 0.0f, 0.0f);
+			p->v.set(0.0f, 0.0f, 0.0f);
 		}
 		else {
-			p.v += (p.f / p.mass) * dt;
+			p->v += (p->f / p->mass) * dt;
 		}
 	}
 
@@ -76,11 +73,10 @@ void ClothSimulator::update()
 	m_CollisionsHandler.handleCollisions(*this, dt);
 
 	// update positions (symplectic euler)
-	for (int i = 0; i < m_Particles.size(); ++i) {
-		Particle& p = *m_Particles[i];
-		if (p.pinned) continue;
-		p.p += p.v * dt;
-		p.f.set(0.0f, 0.0f, 0.0f);
+	for (auto* p : m_Particles) {
+		if (p->pinned) continue;
+		p->p += p->v * dt;
+		p->f.set(0.0f, 0.0f, 0.0f);
 	}
 }
 
@@ -88,33 +84,34 @@ void ClothSimulator::addCloth(Cloth* cloth)
 {
 	m_Cloths.push_back(cloth);
 
-	std::vector<Particle>& p = cloth->getParticles();
-	for (int i = 0; i < p.size(); ++i) {
-		m_Particles.push_back(&p[i]);
+	auto& particles = cloth->getParticles();
+	for (auto& p : particles) {
+		m_Particles.push_back(&p);
+		m_Points.push_back(&p);
 	}
-	std::vector<Spring>& s = cloth->getSprings();
-	for (int i = 0; i < s.size(); ++i) {
-		m_Springs.push_back(&s[i]);
-		if (s[i].isEdge()) {
-			m_Edges.push_back(&s[i]);
+	auto& springs = cloth->getSprings();
+	for (auto& s : springs) {
+		m_Springs.push_back(&s);
+		if (s.isEdge()) {
+			m_Edges.push_back(&s);
 		}
 	}
 
 	//2 triangles per quad, 3 pts per triangle
 	int width = cloth->getWidth();
 	int height = cloth->getHeight();
-	int nVertices = p.size();
+	int nVertices = particles.size();
 	int nTriangles = 2 * ((width - 1)*(height - 1));
 	int nIndices = 3 * nTriangles;
 	for (int y = 0; y < height - 1; ++y) {
 		for (int x = 0; x < width - 1; ++x) {
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x, y)]);
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y)]);
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x, y + 1)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x, y)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x + 1, y)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x, y + 1)]);
 
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x, y + 1)]);
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y)]);
-			m_TriangleParticles.push_back(&p[cloth->idx2Dto1D(x + 1, y + 1)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x, y + 1)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x + 1, y)]);
+			m_Triangles.push_back(&particles[cloth->idx2Dto1D(x + 1, y + 1)]);
 		}
 	}
 }
@@ -131,11 +128,9 @@ void ClothSimulator::addObject(scene::IMesh* mesh)
 		Particle* p = new Particle(v.Pos.X, v.Pos.Y, v.Pos.Z, 0.0f, 0.0f, 0.0f);
 		p->pinned = true;
 		m_ObjectParticles.push_back(p);
-		m_Particles.push_back(p);
+		m_Points.push_back(p);
 	}
 
-	// create triangles list
-	// create edges list
 	for (int i = 0; i < nIndices; i+=3) {
 		int idxA = buffer->Indices[i + 0];
 		int idxB = buffer->Indices[i + 1];
@@ -145,9 +140,9 @@ void ClothSimulator::addObject(scene::IMesh* mesh)
 		Particle* p3 = m_ObjectParticles[idxC];
 
 		// create triangles list
-		m_TriangleParticles.push_back(p1);
-		m_TriangleParticles.push_back(p2);
-		m_TriangleParticles.push_back(p3);
+		m_Triangles.push_back(p1);
+		m_Triangles.push_back(p2);
+		m_Triangles.push_back(p3);
 
 		// create Springs
 		Spring* s1 = new Spring(p1, p2, 1.0f, 1.0f, true);
@@ -156,9 +151,6 @@ void ClothSimulator::addObject(scene::IMesh* mesh)
 		m_ObjectSprings.push_back(s1);
 		m_ObjectSprings.push_back(s2);
 		m_ObjectSprings.push_back(s3);
-		m_Springs.push_back(s1);
-		m_Springs.push_back(s2);
-		m_Springs.push_back(s3);
 
 		// create edges list
 		m_Edges.push_back(s1);
@@ -171,6 +163,7 @@ void ClothSimulator::addTestParticle(Particle* particle)
 {
 	m_TestParticles.push_back(particle);
 	m_Particles.push_back(particle);
+	m_Points.push_back(particle);
 }
 
 void ClothSimulator::addTestSpring(Spring* spring)
@@ -182,7 +175,7 @@ void ClothSimulator::addTestSpring(Spring* spring)
 
 void ClothSimulator::addTestTriangle(Particle* pA, Particle* pB, Particle* pC)
 {
-	m_TriangleParticles.push_back(pA);
-	m_TriangleParticles.push_back(pB);
-	m_TriangleParticles.push_back(pC);
+	m_Triangles.push_back(pA);
+	m_Triangles.push_back(pB);
+	m_Triangles.push_back(pC);
 }
