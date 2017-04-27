@@ -142,8 +142,8 @@ int main()
 	device->getCursorControl()->setVisible(false);
 
 	// floor
-	core::dimension2df tileSize(256,256);
-	core::dimension2du tileCount(10,10);
+	core::dimension2df tileSize(256*10,256*10);
+	core::dimension2du tileCount(1,1);
 	core::dimension2df textureRepeatCount(10,10);
 	scene::IMesh* floorMesh = smgr->getGeometryCreator()->createPlaneMesh(tileSize, tileCount, 0, textureRepeatCount);
 	scene::IMeshSceneNode* floorNode = smgr->addMeshSceneNode(floorMesh, 0, -1, core::vector3df(0, 0, 0));
@@ -188,6 +188,7 @@ int main()
 	ClothSimulator clothSimulator;
 	clothSimulator.init();
 	clothSimulator.addObject(sphereMesh);
+	//clothSimulator.addObject(floorMesh);
 	TestSystems test;
 	//test.load(&clothSimulator, camera);
 	TestSystemRenderer testRenderer(smgr);
