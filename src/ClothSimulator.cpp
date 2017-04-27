@@ -88,6 +88,9 @@ void ClothSimulator::addCloth(Cloth* cloth)
 	std::vector<Spring>& s = cloth->getSprings();
 	for (int i = 0; i < s.size(); ++i) {
 		m_Springs.push_back(&s[i]);
+		if (s[i].isEdge()) {
+			m_Edges.push_back(&s[i]);
+		}
 	}
 
 	//2 triangles per quad, 3 pts per triangle
@@ -119,6 +122,7 @@ void ClothSimulator::addTestSpring(Spring* spring)
 {
 	m_TestSprings.push_back(spring);
 	m_Springs.push_back(spring);
+	m_Edges.push_back(spring);
 }
 
 void ClothSimulator::addTestTriangle(Particle* pA, Particle* pB, Particle* pC)

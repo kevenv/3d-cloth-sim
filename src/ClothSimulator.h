@@ -25,6 +25,7 @@ public:
 	inline const std::vector<Cloth*>& getCloths() const { return m_Cloths; }
 	inline const std::vector<Particle*>& getParticles() const { return m_Particles; }
 	inline const std::vector<Spring*>& getSprings() const { return m_Springs; }
+	inline const std::vector<Spring*>& getEdges() const { return m_Edges; }
 	inline const std::vector<Particle*>& getTriangleParticles() const { return m_TriangleParticles; }
 	inline const std::vector<Particle*>& getTestParticles() const { return m_TestParticles; }
 	inline const std::vector<Spring*>& getTestSprings() const { return m_TestSprings; }
@@ -34,6 +35,7 @@ private:
 	std::vector<Particle*> m_Particles;
 	std::vector<Spring*> m_Springs;
 	std::vector<Particle*> m_TriangleParticles;
+	std::vector<Spring*> m_Edges;
 
 	std::vector<Particle*> m_TestParticles;
 	std::vector<Spring*> m_TestSprings;

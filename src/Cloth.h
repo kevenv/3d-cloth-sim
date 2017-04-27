@@ -46,7 +46,7 @@ private:
 	core::vector3df m_Position;
 	core::vector3df m_Rotation;
 
-	void addNeighbor(int x, int y, Particle* p1, float k, float b);
+	void addNeighbor(int x, int y, Particle* p1, float k, float b, bool edge);
 };
 
 #endif

@@ -59,28 +59,28 @@ void Cloth::generate(int width, int height, float resolution)
 		// create structural springs
 		const float k_structural = 150.0f;
 		const float b_structural = 2.5f;
-		addNeighbor(x+1, y, p, k_structural, b_structural);
-		addNeighbor(x, y+1, p, k_structural, b_structural);
+		addNeighbor(x+1, y, p, k_structural, b_structural, true);
+		addNeighbor(x, y+1, p, k_structural, b_structural, true);
 
 		// create shear springs
 		const float k_shear = 100.0f;
 		const float b_shear = 1.0f;
-		addNeighbor(x-1, y+1, p, k_shear, b_shear);
-		addNeighbor(x+1, y+1, p, k_shear, b_shear);
+		addNeighbor(x-1, y+1, p, k_shear, b_shear, false);
+		addNeighbor(x+1, y+1, p, k_shear, b_shear, true);
 		
 		// create flexion springs
 		const float k_flexion = 100.0f;
 		const float b_flexion = 1.0f;
-		addNeighbor(x+2, y, p, k_flexion, b_flexion);
-		addNeighbor(x, y+2, p, k_flexion, b_flexion);
+		addNeighbor(x+2, y, p, k_flexion, b_flexion, false);
+		addNeighbor(x, y+2, p, k_flexion, b_flexion, false);
 	}
 }
 
-void Cloth::addNeighbor(int x, int y, Particle* p1, float k, float b)
+void Cloth::addNeighbor(int x, int y, Particle* p1, float k, float b, bool edge)
 {
 	Particle* p2 = getParticle(x,y);
 	if (p2) {
-		m_Springs.push_back(Spring(p1, p2, k, b));
+		m_Springs.push_back(Spring(p1, p2, k, b, edge));
 	}
 }
 

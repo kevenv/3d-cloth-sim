@@ -7,16 +7,18 @@ Spring::Spring():
 	p2(NULL),
 	k(0.0f),
 	b(0.0f),
-	l0(0.0f)
+	l0(0.0f),
+	edge(true)
 {
 
 }
 
-Spring::Spring(Particle* p1, Particle* p2, f32 k, f32 b):
+Spring::Spring(Particle* p1, Particle* p2, f32 k, f32 b, bool edge):
 	p1(p1),
 	p2(p2),
 	k(k),
-	b(b)
+	b(b),
+	edge(edge)
 {
 	computeRestLength();
 }

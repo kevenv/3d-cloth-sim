@@ -41,7 +41,7 @@ void CollisionsHandler::applyRepulsionsForces(ClothSimulator& clothSim, float dt
 		}
 	}
 
-	auto& springs = clothSim.getSprings();
+	auto& springs = clothSim.getEdges();
 	for (auto* sA : springs) {
 		Particle* p1 = sA->getP1();
 		Particle* p2 = sA->getP2();
@@ -107,7 +107,7 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 {
 	auto& particles = clothSim.getParticles();
 	auto& triangles = clothSim.getTriangleParticles();
-	auto& springs = clothSim.getSprings();
+	auto& edges = clothSim.getEdges();
 
 	bool resolved = false;
 	int iterations = 0;
@@ -126,11 +126,11 @@ void CollisionsHandler::resolveCollisions(ClothSimulator& clothSim, float dt)
 			}
 		}
 
-		for (auto* sA : springs) {
+		for (auto* sA : edges) {
 			Particle* p1 = sA->getP1();
 			Particle* p2 = sA->getP2();
 
-			for (auto* sB : springs) {
+			for (auto* sB : edges) {
 				if (sA != sB) {
 					Particle* p3 = sB->getP1();
 					Particle* p4 = sB->getP2();
