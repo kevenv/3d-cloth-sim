@@ -4,9 +4,10 @@
 #include "Cloth.h"
 #include "Particle.h"
 
-ClothRenderer::ClothRenderer(scene::ISceneManager* smgr):
+ClothRenderer::ClothRenderer(scene::ISceneManager* smgr, bool drawParticles):
 	m_smgr(smgr),
-	m_ParticleMesh(NULL)
+	m_ParticleMesh(NULL),
+	m_DrawParticles(drawParticles)
 {
 
 }
@@ -18,39 +19,46 @@ ClothRenderer::~ClothRenderer()
 
 void ClothRenderer::init(const std::vector<Cloth*>& cloths)
 {
-	m_ParticleMesh = m_smgr->getGeometryCreator()->createSphereMesh(5.0f);
+	if (m_DrawParticles) {
+		m_ParticleMesh = m_smgr->getGeometryCreator()->createSphereMesh(5.0f);
+	}
 
-	for (int i = 0; i < cloths.size(); ++i) {
-		Cloth* cloth = cloths[i];
+	for (auto* cloth : cloths) {
 		ClothSceneNode* clothNode = new ClothSceneNode(cloth, m_smgr->getRootSceneNode(), m_smgr);
 		m_ClothNodes.push_back(clothNode);
 				
-		auto& particles = cloth->getParticles();
-		for (auto& p : particles) {
-			scene::IMeshSceneNode* node = createParticleNode();
-			node->setPosition(p.p);
-			m_Particles.push_back(&p);
+		if (m_DrawParticles) {
+			auto& particles = cloth->getParticles();
+			for (auto& p : particles) {
+				scene::IMeshSceneNode* node = createParticleNode();
+				node->setPosition(p.p);
+				m_Particles.push_back(&p);
+			}
 		}
 	}
 }
 
 void ClothRenderer::close()
 {
-	for (int i = 0; i < m_ClothNodes.size(); ++i) {
-		m_ClothNodes[i]->drop(); //delete
+	for (auto* n : m_ClothNodes) {
+		n->drop(); //delete
 	}
 
-	m_ParticleMesh->drop();
+	if (m_DrawParticles) {
+		m_ParticleMesh->drop();
+	}
 }
 
 void ClothRenderer::update()
 {
-	for (int i = 0; i < m_ClothNodes.size(); ++i) {
-		m_ClothNodes[i]->update();
+	for (auto* c : m_ClothNodes) {
+		c->update();
 	}
 	
-	for (int i = 0; i < m_Particles.size(); ++i) {
-		m_ParticleNodes[i]->setPosition(m_Particles[i]->p);
+	if (m_DrawParticles) {
+		for (int i = 0; i < m_Particles.size(); ++i) {
+			m_ParticleNodes[i]->setPosition(m_Particles[i]->p);
+		}
 	}
 }
 
@@ -78,5 +86,5 @@ Particle* ClothRenderer::getParticleFromNode(scene::ISceneNode* node)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }

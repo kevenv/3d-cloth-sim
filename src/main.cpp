@@ -206,7 +206,7 @@ int main()
 		cloth->pinAll();
 		clothSimulator.addCloth(cloth);
 	}
-	ClothRenderer clothRenderer(smgr);
+	ClothRenderer clothRenderer(smgr, true /*draw particles*/);
 	clothRenderer.init(clothSimulator.getCloths());
 
 	// create event receiver
