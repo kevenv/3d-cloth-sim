@@ -62,11 +62,13 @@ scene::IMeshSceneNode* ClothRenderer::createParticleNode()
 	scene::IMeshSceneNode* node = m_smgr->addMeshSceneNode(m_ParticleMesh, 0, -1, core::vector3df(0, 0, 0));
 	node->setMaterialType(video::EMT_SOLID);
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	node->setID(1); // PICKABLE_ID
 
+	/*
+	node->setID(1); // PICKABLE_ID
 	scene::ITriangleSelector* selector = m_smgr->createOctreeTriangleSelector(m_ParticleMesh, node);
 	node->setTriangleSelector(selector);
 	selector->drop();
+	*/
 
 	m_ParticleNodes.push_back(node);
 
