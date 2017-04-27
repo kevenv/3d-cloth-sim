@@ -204,7 +204,7 @@ int main()
 	scene::IMeshSceneNode* sphereNode = smgr->addMeshSceneNode(sphereMesh, 0, -1, core::vector3df(0, 0, 0));
 	sphereNode->setPosition(core::vector3df(0, 0, 0));
 	sphereNode->setMaterialType(video::EMT_SOLID);
-	sphereNode->setMaterialFlag(video::EMF_LIGHTING, false);
+	sphereNode->setMaterialFlag(video::EMF_LIGHTING, true);
 	smgr->getMeshManipulator()->setVertexColors(sphereMesh, video::SColor(255, 163, 73, 164));
 	smgr->getMeshManipulator()->recalculateNormals(sphereMesh, true, false);
 
