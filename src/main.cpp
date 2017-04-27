@@ -118,10 +118,23 @@ public:
 			case irr::KEY_KEY_P:
 				rdr->setDrawParticles(!rdr->getDrawParticles());
 				break;
+			case irr::KEY_KEY_W:
+				sim->m_WindEnabled = false;
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
 			default:
+				break;
+			}
+		}
+
+		if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown)
+		{
+			switch (event.KeyInput.Key)
+			{
+			case irr::KEY_KEY_W:
+				sim->m_WindEnabled = true;
 				break;
 			}
 		}

@@ -4,7 +4,8 @@
 
 ClothSimulator::ClothSimulator():
 	m_CollisionsEnabled(true),
-	m_Reset(false)
+	m_Reset(false),
+	m_WindEnabled(false)
 {
 
 }
@@ -59,7 +60,10 @@ void ClothSimulator::update()
 		// viscous drag
 		p->addForce( -kd * p->v );
 		// wind
-		p->addForce(core::vector3df(2.0f,0.0f,2.0f));
+		if (m_WindEnabled) {
+			float windForce = 2.0f;
+			p->addForce(core::vector3df(windForce, 0.0f, windForce));
+		}
 	}
 
 	// spring forces

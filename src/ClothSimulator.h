@@ -36,6 +36,7 @@ public:
 
 	bool m_CollisionsEnabled;
 	bool m_Reset;
+	bool m_WindEnabled;
 
 private:
 	// for particles system simulation
