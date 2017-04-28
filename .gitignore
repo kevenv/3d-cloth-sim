@@ -12,3 +12,5 @@ irrlicht/include/*
 *.lastbuildstate
 *.pdb
 *.obj
+
+/screenshots/
