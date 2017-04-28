@@ -31,7 +31,7 @@ public:
 	} MouseState;
 
 	MyEventReceiver(IrrlichtDevice* device, scene::ICameraSceneNode* camera, scene::IMeshSceneNode* lightNode, scene::COrientationAxisSceneNode* axisNode,
-                    Cloth* cloth, ClothSimulator* sim, ClothRenderer* rdr, scene::IMeshSceneNode* sphereNode) :
+                    Cloth* cloth, ClothSimulator* sim, ClothRenderer* rdr, scene::IMeshSceneNode* sphereNode, bool& recordEnabled) :
 		device(device),
 		camera(camera),
 		lightNode(lightNode),
@@ -39,7 +39,8 @@ public:
 		cloth(cloth),
 		sim(sim),
 		rdr(rdr),
-		sphereNode(sphereNode)
+		sphereNode(sphereNode),
+		recordEnabled(recordEnabled)
 	{
 
 	}
@@ -129,6 +130,9 @@ public:
 				sphereNode->getMaterial(0).Wireframe = wireframe;
 				break;
 			}
+			case irr::KEY_KEY_V:
+				recordEnabled = !recordEnabled;
+				break;
 			case irr::KEY_ESCAPE:
 				device->closeDevice();
 				return true;
@@ -159,8 +163,10 @@ private:
 	ClothSimulator* sim;
 	ClothRenderer* rdr;
 	scene::IMeshSceneNode* sphereNode;
+	bool& recordEnabled;
 };
 
+void takeScreenshot(irr::IrrlichtDevice* device);
 void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core::vector2di& clickPos, scene::ISceneManager* smgr, IrrlichtDevice* device, scene::ICameraSceneNode* camera, ClothRenderer& clothRenderer);
 
 int main()
@@ -265,8 +271,10 @@ int main()
 	ClothRenderer clothRenderer(smgr);
 	clothRenderer.init(clothSimulator.getCloths());
 
+	bool recordEnabled = false;
+
 	// create event receiver
-	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth, &clothSimulator, &clothRenderer, sphereNode);
+	MyEventReceiver receiver(device, camera, lightNode, axisNode, cloth, &clothSimulator, &clothRenderer, sphereNode, recordEnabled);
 	device->setEventReceiver(&receiver);
 
 	// 3D picking
@@ -293,6 +301,10 @@ int main()
 		env->drawAll();
 		testRenderer.render(driver);
 		driver->endScene();
+
+		if (recordEnabled) {
+			takeScreenshot(device);
+		}
 
 		// display frames per second in window title
 		int fps = driver->getFPS();
@@ -375,5 +387,28 @@ void update3DPicking(MyEventReceiver& receiver, Particle* selectedParticle, core
 
 		std::cout << v.X << "," << v.Y << "," << v.Z << std::endl;
 		selectedParticle->addForce(v*2.5f);
+	}
+}
+
+void takeScreenshot(irr::IrrlichtDevice* device)
+{
+	static int frameId = 0;
+	irr::video::IVideoDriver* const driver = device->getVideoDriver();
+
+	//get image from the last rendered frame 
+	irr::video::IImage* const image = driver->createScreenShot();
+	if (image) //should always be true, but you never know. ;) 
+	{
+		//construct a filename, consisting of local time and file extension 
+		irr::c8 filename[64];
+		snprintf(filename, 64, "../screenshots/screenshot_%u.png", frameId);
+		frameId++;
+
+		//write screenshot to file 
+		if (!driver->writeImageToFile(image, filename))
+			device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
+
+		//Don't forget to drop image since we don't need it anymore. 
+		image->drop();
 	}
 }
