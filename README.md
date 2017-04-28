@@ -24,3 +24,13 @@ Cloth simulator based on Bridson2002 (Robust Treatment of Collisions, Contact an
 | R          | Reset simulation               |
 | V          | Toggle record screen           |
 | C          | Print camera position & target |
+
+## Build
+These instructions are for Microsoft Visual Studio 2017 but should work with earlier versions.
+
+1. Extract the latest source code of the Irrlicht engine into the `irrlicht` directory
+2. Open `irrlicht/examples/BuildAllExamples_vc12.sln`
+3. Build the `Irrlicht` project
+4. Copy `irrlicht/bin/Win64-VisualStudio/irrlicht.dll` into `bin/win64/`
+5. Open `src/clothsim.sln`
+6. Build the `clothsim` project
