@@ -22,4 +22,5 @@ Cloth simulator based on Bridson2002 (Robust Treatment of Collisions, Contact an
 | H          | Toggle wireframe mode          |
 | K          | Toggle collisions detection    |
 | R          | Reset simulation               |
+| V          | Toggle record screen           |
 | C          | Print camera position & target |
