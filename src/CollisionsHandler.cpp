@@ -21,7 +21,7 @@ CollisionsHandler::~CollisionsHandler()
 
 void CollisionsHandler::handleCollisions(ClothSimulator& sim, float dt)
 {
-	//applyRepulsionsForces(sim, dt);
+	applyRepulsionsForces(sim, dt);
 	resolveCollisions(sim, dt);
 }
 
@@ -170,11 +170,9 @@ bool CollisionsHandler::resolveCollision_PointTriangle(Particle* p, Particle* pA
 		core::vector3df Vr((pNew - p->v) - w1*(pANew - pA->v) - w2*(pBNew - pB->v) - w3*(pCNew - pC->v));
 		Vrn = Vr.dotProduct(N);
 		Vrt = Vr.dotProduct(T);
-		/*
 		if (Vrn >= 0.1*d / dt) {
 			return true; //things are going to sort themselves out
 		}
-		*/
 
 		float I = computeImpulse_PointTriangle(p, pA, pB, pC, w1, w2, w3, Vrn);
 		applyImpulsion_PointTriangle(p, pA, pB, pC, N, w1, w2, w3, I);
@@ -204,16 +202,9 @@ bool CollisionsHandler::resolveCollision_EdgeEdge(Particle* p1, Particle* p2, Pa
 
 		float Vrn, Vrt;
 		computeRelVel_EdgeEdge(p1, p2, p3, p4, a, b, N, T, Vrn, Vrt);
-		/*
-		core::vector3df Vr((1 - a)*(p1New-p1->v) + a*(p2New-p2->v) - (1 - b)*(p3New-p3->v) - b*(p4New-p4->v));
-		Vrn = Vr.dotProduct(N);
-		Vrt = Vr.dotProduct(T);
-		*/
-		/*
 		if (Vrn >= 0.1*d / dt) {
 			return true; //things are going to sort themselves out
 		}
-		*/
 
 		float I = computeImpulse_EdgeEdge(p1, p2, p3, p4, a, b, Vrn);
 		applyImpulsion_EdgeEdge(p1, p2, p3, p4, N, a, b, I);
