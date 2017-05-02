@@ -225,7 +225,7 @@ int main()
 
 	// create skydome
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-	scene::ISceneNode* skydome=smgr->addSkyDomeSceneNode(driver->getTexture("../irrlicht/media/skydome.jpg"),16,8,0.95f,2.0f);
+	scene::ISceneNode* skydome=smgr->addSkyDomeSceneNode(driver->getTexture("../assets/skydome.jpg"),16,8,0.95f,2.0f);
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	// axis
